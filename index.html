@@ -4,749 +4,263 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cronbach's Alpha Calculator</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-      *,
-      *::before,
-      *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
       :root {
-        --bg: #f7f6f2;
-        --surface: #ffffff;
-        --surface2: #f0efe9;
-        --border: #dddbd2;
-        --border2: #c8c6bc;
-        --text: #1a1916;
-        --text2: #4a4843;
-        --text3: #8a8880;
-        --teal: #0f6e56;
-        --teal-light: #e1f5ee;
-        --teal-mid: #1d9e75;
-        --teal-dk: #085041;
-        --amber: #854f0b;
-        --amber-light: #faeeda;
-        --purple: #534ab7;
+        --bg: #f7f6f2; --surface: #ffffff; --surface2: #f0efe9;
+        --border: #dddbd2; --border2: #c8c6bc;
+        --text: #1a1916; --text2: #4a4843; --text3: #8a8880;
+        --teal: #0f6e56; --teal-light: #e1f5ee; --teal-mid: #1d9e75; --teal-dk: #085041;
+        --amber: #854f0b; --amber-light: #faeeda;
+        --purple: #534ab7; --purple-light: #f0effe;
+        --ai: #6d28d9; --ai-light: #ede9fe; --ai-mid: #7c3aed; --ai-dk: #4c1d95;
         --mono: "JetBrains Mono", monospace;
         --serif: "Source Serif 4", serif;
         --sans: "DM Sans", sans-serif;
-        --r: 10px;
-        --r-sm: 6px;
+        --r: 10px; --r-sm: 6px;
       }
-
       [data-theme="dark"] {
-        --bg: #111110;
-        --surface: #1a1917;
-        --surface2: #222220;
-        --border: #2e2d2a;
-        --border2: #3e3d39;
-        --text: #f0ede6;
-        --text2: #a8a49c;
-        --text3: #5e5c57;
-        --teal: #5dcaa5;
-        --teal-light: #04342c;
-        --teal-mid: #1d9e75;
-        --teal-dk: #9fe1cb;
-        --amber: #fac775;
-        --amber-light: #412402;
-        --purple: #afa9ec;
+        --bg: #111110; --surface: #1a1917; --surface2: #222220;
+        --border: #2e2d2a; --border2: #3e3d39;
+        --text: #f0ede6; --text2: #a8a49c; --text3: #5e5c57;
+        --teal: #5dcaa5; --teal-light: #04342c; --teal-mid: #1d9e75; --teal-dk: #9fe1cb;
+        --amber: #fac775; --amber-light: #412402;
+        --purple: #afa9ec; --purple-light: #1e1a40;
+        --ai: #a78bfa; --ai-light: #1e1040; --ai-mid: #7c3aed; --ai-dk: #c4b5fd;
       }
-
-      html,
-      body {
-        min-height: 100%;
-      }
-      body {
-        font-family: var(--sans);
-        background: var(--bg);
-        color: var(--text);
-        font-size: 14px;
-        line-height: 1.6;
-        transition:
-          background 0.2s,
-          color 0.2s;
-      }
+      html, body { min-height: 100%; }
+      body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.6; transition: background 0.2s, color 0.2s; }
 
       /* HEADER */
-      .hdr {
-        background: var(--surface);
-        border-bottom: 1px solid var(--border);
-        padding: 13px 22px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        position: sticky;
-        top: 0;
-        z-index: 100;
-      }
-      .hdr-left {
-        display: flex;
-        align-items: baseline;
-        gap: 12px;
-        flex: 1;
-        min-width: 0;
-      }
-      .hdr h1 {
-        font-family: var(--serif);
-        font-size: 19px;
-        font-weight: 600;
-        letter-spacing: -0.3px;
-        color: var(--text);
-        white-space: nowrap;
-      }
-      .hdr .sub {
-        font-size: 12px;
-        color: var(--text3);
-        font-weight: 300;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .toggle-btn {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 13px;
-        border: 1px solid var(--border2);
-        border-radius: 20px;
-        background: var(--surface2);
-        cursor: pointer;
-        font-family: var(--sans);
-        font-size: 12px;
-        font-weight: 500;
-        color: var(--text2);
-        transition:
-          background 0.15s,
-          color 0.15s;
-        white-space: nowrap;
-        flex-shrink: 0;
-      }
-      .toggle-btn:hover {
-        background: var(--border);
-        color: var(--text);
-      }
+      .hdr { background: var(--surface); border-bottom: 1px solid var(--border); padding: 13px 22px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; }
+      .hdr-left { display: flex; align-items: baseline; gap: 12px; flex: 1; min-width: 0; }
+      .hdr h1 { font-family: var(--serif); font-size: 19px; font-weight: 600; letter-spacing: -0.3px; color: var(--text); white-space: nowrap; }
+      .hdr .sub { font-size: 12px; color: var(--text3); font-weight: 300; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .toggle-btn { display: flex; align-items: center; gap: 6px; padding: 6px 13px; border: 1px solid var(--border2); border-radius: 20px; background: var(--surface2); cursor: pointer; font-family: var(--sans); font-size: 12px; font-weight: 500; color: var(--text2); transition: background 0.15s, color 0.15s; white-space: nowrap; flex-shrink: 0; }
+      .toggle-btn:hover { background: var(--border); color: var(--text); }
 
       /* PAGE */
-      .wrap {
-        padding: 18px 22px;
-        display: flex;
-        flex-direction: column;
-        gap: 18px;
-      }
+      .wrap { padding: 18px 22px; display: flex; flex-direction: column; gap: 18px; }
 
       /* CONFIG BAR */
-      .cfg {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--r);
-        padding: 14px 18px;
-        display: flex;
-        align-items: flex-end;
-        gap: 14px;
-        flex-wrap: wrap;
-      }
-      .cfg-title {
-        font-family: var(--serif);
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--text);
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        white-space: nowrap;
-        align-self: center;
-        margin-right: 4px;
-      }
-      .cfg-title::before {
-        content: "";
-        display: inline-block;
-        width: 3px;
-        height: 13px;
-        background: var(--teal-mid);
-        border-radius: 2px;
-      }
-      .fld {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        min-width: 130px;
-        flex: 1;
-      }
-      .fld label {
-        font-size: 11px;
-        font-weight: 500;
-        color: var(--text2);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-      .fld input[type="number"] {
-        width: 100%;
-        padding: 8px 11px;
-        border: 1px solid var(--border);
-        border-radius: var(--r-sm);
-        font-family: var(--mono);
-        font-size: 14px;
-        color: var(--text);
-        background: var(--bg);
-        outline: none;
-        transition:
-          border-color 0.15s,
-          background 0.15s;
-      }
-      .fld input[type="number"]:focus {
-        border-color: var(--teal-mid);
-        background: var(--surface);
-      }
-      [data-theme="dark"] .fld input[type="number"] {
-        background: var(--surface2);
-      }
-      [data-theme="dark"] .fld input[type="number"]:focus {
-        background: var(--surface);
-      }
+      .cfg { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 18px; display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
+      .cfg-title { font-family: var(--serif); font-size: 13px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 7px; white-space: nowrap; align-self: center; margin-right: 4px; }
+      .cfg-title::before { content: ""; display: inline-block; width: 3px; height: 13px; background: var(--teal-mid); border-radius: 2px; }
+      .fld { display: flex; flex-direction: column; gap: 4px; min-width: 130px; flex: 1; }
+      .fld label { font-size: 11px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+      .fld input[type="number"] { width: 100%; padding: 8px 11px; border: 1px solid var(--border); border-radius: var(--r-sm); font-family: var(--mono); font-size: 14px; color: var(--text); background: var(--bg); outline: none; transition: border-color 0.15s, background 0.15s; }
+      .fld input[type="number"]:focus { border-color: var(--teal-mid); background: var(--surface); }
+      [data-theme="dark"] .fld input[type="number"] { background: var(--surface2); }
+      [data-theme="dark"] .fld input[type="number"]:focus { background: var(--surface); }
+      .gen-btn { padding: 9px 20px; background: var(--teal); color: #fff; border: none; border-radius: var(--r-sm); font-family: var(--sans); font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; flex-shrink: 0; align-self: flex-end; transition: background 0.15s, transform 0.1s; }
+      .gen-btn:hover { background: var(--teal-dk); }
+      .gen-btn:active { transform: scale(0.98); }
 
-      .gen-btn {
-        padding: 9px 20px;
-        background: var(--teal);
-        color: #fff;
-        border: none;
-        border-radius: var(--r-sm);
-        font-family: var(--sans);
-        font-size: 13px;
-        font-weight: 500;
-        cursor: pointer;
-        white-space: nowrap;
-        flex-shrink: 0;
-        align-self: flex-end;
-        transition:
-          background 0.15s,
-          transform 0.1s;
-      }
-      .gen-btn:hover {
-        background: var(--teal-dk);
-      }
-      .gen-btn:active {
-        transform: scale(0.98);
-      }
+      /* DOWNLOAD BAR */
+      .dl-bar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 13px 18px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+      .dl-title { font-family: var(--serif); font-size: 13px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 7px; white-space: nowrap; flex-shrink: 0; }
+      .dl-title::before { content: ""; display: inline-block; width: 3px; height: 13px; background: var(--purple); border-radius: 2px; }
+      .dl-btns { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
+      .dl-btn { display: flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: var(--r-sm); font-family: var(--sans); font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid var(--border2); background: var(--surface2); color: var(--text2); transition: all 0.15s; white-space: nowrap; }
+      .dl-btn:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,0.1); }
+      .dl-btn.xlsx { border-color: #1d6f42; color: #1d6f42; background: #e8f5ee; }
+      .dl-btn.xlsx:hover { background: #1d6f42; color: #fff; }
+      .dl-btn.docx { border-color: #2b579a; color: #2b579a; background: #eaf0f9; }
+      .dl-btn.docx:hover { background: #2b579a; color: #fff; }
+      .dl-btn.pdf { border-color: #c0392b; color: #c0392b; background: #fdecea; }
+      .dl-btn.pdf:hover { background: #c0392b; color: #fff; }
+      .dl-btn.png { border-color: #7c4dff; color: #7c4dff; background: #f0ebff; }
+      .dl-btn.png:hover { background: #7c4dff; color: #fff; }
+      [data-theme="dark"] .dl-btn.xlsx { background: #0a2e1a; border-color: #2ecc71; color: #2ecc71; }
+      [data-theme="dark"] .dl-btn.docx { background: #0a1a35; border-color: #5b9bd5; color: #5b9bd5; }
+      [data-theme="dark"] .dl-btn.pdf { background: #2e0a0a; border-color: #e74c3c; color: #e74c3c; }
+      [data-theme="dark"] .dl-btn.png { background: #1a0a35; border-color: #b39ddb; color: #b39ddb; }
+      .dl-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+      .dl-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
 
       /* TABLE CARD */
-      .tbl-card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--r);
-        overflow: hidden;
-      }
-      .tbl-hdr {
-        padding: 11px 18px;
-        border-bottom: 1px solid var(--border);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        flex-wrap: wrap;
-      }
-      .tbl-hdr h2 {
-        font-family: var(--serif);
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--text);
-      }
-      .prog-row {
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        flex: 1;
-        min-width: 140px;
-        max-width: 300px;
-      }
-      .prog-wrap {
-        flex: 1;
-        height: 5px;
-        background: var(--border);
-        border-radius: 3px;
-        overflow: hidden;
-      }
-      .prog-bar {
-        height: 100%;
-        background: var(--teal-mid);
-        border-radius: 3px;
-        transition: width 0.3s;
-      }
-      .prog-lbl {
-        font-size: 11px;
-        color: var(--text3);
-        white-space: nowrap;
-      }
-
-      .tbl-scroll {
-        overflow: auto;
-        width: 100%;
-        max-height: 55vh;
-      }
-
-      table {
-        border-collapse: collapse;
-        font-family: var(--mono);
-        font-size: 12px;
-        width: 100%;
-      }
-
-      thead th {
-        position: sticky;
-        top: 0;
-        background: var(--surface2);
-        padding: 7px 8px;
-        text-align: center;
-        font-size: 11px;
-        font-weight: 500;
-        color: var(--text2);
-        border-bottom: 1px solid var(--border);
-        border-right: 1px solid var(--border);
-        white-space: nowrap;
-        z-index: 2;
-      }
-      thead th:first-child {
-        position: sticky;
-        left: 0;
-        z-index: 3;
-        min-width: 54px;
-      }
-      thead th.tc {
-        background: var(--teal-light);
-        color: var(--teal);
-        border-right: none;
-      }
-
-      tbody tr:hover td {
-        background: var(--surface2);
-      }
-      tbody td {
-        padding: 1px 3px;
-        border-bottom: 1px solid var(--border);
-        border-right: 1px solid var(--border);
-        text-align: center;
-        vertical-align: middle;
-      }
-      tbody td:first-child {
-        position: sticky;
-        left: 0;
-        background: var(--surface2);
-        font-size: 11px;
-        font-weight: 500;
-        color: var(--text2);
-        padding: 3px 8px;
-        z-index: 1;
-        min-width: 54px;
-      }
-      tbody td.tc {
-        background: var(--teal-light);
-        color: var(--teal);
-        font-weight: 500;
-        border-right: none;
-      }
-
-      tfoot td {
-        background: var(--surface2);
-        padding: 5px 8px;
-        font-size: 11px;
-        font-weight: 500;
-        color: var(--text2);
-        border-top: 2px solid var(--border2);
-        border-right: 1px solid var(--border);
-        text-align: center;
-        position: sticky;
-        bottom: 0;
-        z-index: 1;
-      }
-      tfoot td:first-child {
-        position: sticky;
-        left: 0;
-        z-index: 2;
-      }
-      tfoot td.vc {
-        background: var(--amber-light);
-        color: var(--amber);
-      }
-      tfoot td.tc {
-        background: var(--teal-light);
-        color: var(--teal);
-        border-right: none;
-      }
-
-      input.ci {
-        width: 60px;
-        padding: 4px 5px;
-        border: 1px solid transparent;
-        border-radius: 4px;
-        font-family: var(--mono);
-        font-size: 12px;
-        text-align: center;
-        background: transparent;
-        color: var(--text);
-        outline: none;
-        transition:
-          border-color 0.1s,
-          background 0.1s;
-      }
-      input.ci:focus {
-        border-color: var(--teal-mid);
-        background: var(--surface);
-      }
-      input.ci:hover {
-        border-color: var(--border2);
-        background: var(--surface);
-      }
-
-      .empty-state {
-        padding: 44px 24px;
-        text-align: center;
-        color: var(--text3);
-        font-size: 13px;
-        line-height: 1.9;
-      }
+      .tbl-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+      .tbl-hdr { padding: 11px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+      .tbl-hdr h2 { font-family: var(--serif); font-size: 13px; font-weight: 600; color: var(--text); }
+      .prog-row { display: flex; align-items: center; gap: 9px; flex: 1; min-width: 140px; max-width: 300px; }
+      .prog-wrap { flex: 1; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+      .prog-bar { height: 100%; background: var(--teal-mid); border-radius: 3px; transition: width 0.3s; }
+      .prog-lbl { font-size: 11px; color: var(--text3); white-space: nowrap; }
+      .tbl-scroll { overflow: auto; width: 100%; max-height: 55vh; }
+      table { border-collapse: collapse; font-family: var(--mono); font-size: 12px; width: 100%; }
+      thead th { position: sticky; top: 0; background: var(--surface2); padding: 7px 8px; text-align: center; font-size: 11px; font-weight: 500; color: var(--text2); border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); white-space: nowrap; z-index: 2; }
+      thead th:first-child { position: sticky; left: 0; z-index: 3; min-width: 54px; }
+      thead th.tc { background: var(--teal-light); color: var(--teal); border-right: none; }
+      tbody tr:hover td { background: var(--surface2); }
+      tbody td { padding: 1px 3px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); text-align: center; vertical-align: middle; }
+      tbody td:first-child { position: sticky; left: 0; background: var(--surface2); font-size: 11px; font-weight: 500; color: var(--text2); padding: 3px 8px; z-index: 1; min-width: 54px; }
+      tbody td.tc { background: var(--teal-light); color: var(--teal); font-weight: 500; border-right: none; }
+      tfoot td { background: var(--surface2); padding: 5px 8px; font-size: 11px; font-weight: 500; color: var(--text2); border-top: 2px solid var(--border2); border-right: 1px solid var(--border); text-align: center; position: sticky; bottom: 0; z-index: 1; }
+      tfoot td:first-child { position: sticky; left: 0; z-index: 2; }
+      tfoot td.vc { background: var(--amber-light); color: var(--amber); }
+      tfoot td.tc { background: var(--teal-light); color: var(--teal); border-right: none; }
+      input.ci { width: 60px; padding: 4px 5px; border: 1px solid transparent; border-radius: 4px; font-family: var(--mono); font-size: 12px; text-align: center; background: transparent; color: var(--text); outline: none; transition: border-color 0.1s, background 0.1s; }
+      input.ci:focus { border-color: var(--teal-mid); background: var(--surface); }
+      input.ci:hover { border-color: var(--border2); background: var(--surface); }
+      .empty-state { padding: 44px 24px; text-align: center; color: var(--text3); font-size: 13px; line-height: 1.9; }
 
       /* BOTTOM GRID */
-      .bot {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 16px;
-      }
+      .bot { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
 
       /* RESULT HERO */
-      .hero {
-        background: var(--teal-light);
-        border: 1px solid #9fe1cb;
-        border-radius: var(--r);
-        padding: 18px 20px;
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        flex-wrap: wrap;
-        grid-column: 1 / -1;
-      }
-      [data-theme="dark"] .hero {
-        border-color: #085041;
-      }
-      .alpha-big {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        min-width: 90px;
-      }
-      .alpha-big .al {
-        font-size: 11px;
-        font-weight: 500;
-        color: var(--teal);
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        margin-bottom: 2px;
-      }
-      .alpha-big .av {
-        font-family: var(--serif);
-        font-size: 46px;
-        font-weight: 600;
-        color: var(--teal);
-        line-height: 1;
-        letter-spacing: -2px;
-        font-style: italic;
-      }
-      .abadge {
-        display: inline-block;
-        padding: 4px 13px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 500;
-        margin-top: 7px;
-      }
-      .b-ex {
-        background: #e1f5ee;
-        color: #0f6e56;
-      }
-      .b-gd {
-        background: #eaf3de;
-        color: #3b6d11;
-      }
-      .b-ac {
-        background: #e6f1fb;
-        color: #185fa5;
-      }
-      .b-qu {
-        background: #faeeda;
-        color: #854f0b;
-      }
-      .b-po {
-        background: #fbeaf0;
-        color: #993556;
-      }
-      .b-un {
-        background: #fcebeb;
-        color: #a32d2d;
-      }
-      .b-na {
-        background: var(--surface2);
-        color: var(--text3);
-      }
-      [data-theme="dark"] .b-ex {
-        background: #04342c;
-        color: #5dcaa5;
-      }
-      [data-theme="dark"] .b-gd {
-        background: #173404;
-        color: #97c459;
-      }
-      [data-theme="dark"] .b-ac {
-        background: #042c53;
-        color: #85b7eb;
-      }
-      [data-theme="dark"] .b-qu {
-        background: #412402;
-        color: #fac775;
-      }
-      [data-theme="dark"] .b-po {
-        background: #4b1528;
-        color: #ed93b1;
-      }
-      [data-theme="dark"] .b-un {
-        background: #501313;
-        color: #f09595;
-      }
-
-      .mstrip {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        flex: 1;
-      }
-      .mpill {
-        background: var(--surface);
-        border-radius: var(--r-sm);
-        padding: 9px 13px;
-        min-width: 90px;
-        flex: 1;
-      }
-      .mpill .mpl {
-        font-size: 11px;
-        font-weight: 500;
-        color: var(--text3);
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-      }
-      .mpill .mpv {
-        font-family: var(--mono);
-        font-size: 16px;
-        font-weight: 500;
-        color: var(--text);
-        margin-top: 2px;
-      }
+      .hero { background: var(--teal-light); border: 1px solid #9fe1cb; border-radius: var(--r); padding: 18px 20px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; grid-column: 1 / -1; }
+      [data-theme="dark"] .hero { border-color: #085041; }
+      .alpha-big { display: flex; flex-direction: column; align-items: center; min-width: 90px; }
+      .alpha-big .al { font-size: 11px; font-weight: 500; color: var(--teal); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 2px; }
+      .alpha-big .av { font-family: var(--serif); font-size: 46px; font-weight: 600; color: var(--teal); line-height: 1; letter-spacing: -2px; font-style: italic; }
+      .abadge { display: inline-block; padding: 4px 13px; border-radius: 20px; font-size: 12px; font-weight: 500; margin-top: 7px; }
+      .b-ex { background: #e1f5ee; color: #0f6e56; } .b-gd { background: #eaf3de; color: #3b6d11; } .b-ac { background: #e6f1fb; color: #185fa5; }
+      .b-qu { background: #faeeda; color: #854f0b; } .b-po { background: #fbeaf0; color: #993556; } .b-un { background: #fcebeb; color: #a32d2d; } .b-na { background: var(--surface2); color: var(--text3); }
+      [data-theme="dark"] .b-ex { background: #04342c; color: #5dcaa5; } [data-theme="dark"] .b-gd { background: #173404; color: #97c459; } [data-theme="dark"] .b-ac { background: #042c53; color: #85b7eb; }
+      [data-theme="dark"] .b-qu { background: #412402; color: #fac775; } [data-theme="dark"] .b-po { background: #4b1528; color: #ed93b1; } [data-theme="dark"] .b-un { background: #501313; color: #f09595; }
+      .mstrip { display: flex; flex-wrap: wrap; gap: 10px; flex: 1; }
+      .mpill { background: var(--surface); border-radius: var(--r-sm); padding: 9px 13px; min-width: 90px; flex: 1; }
+      .mpill .mpl { font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px; }
+      .mpill .mpv { font-family: var(--mono); font-size: 16px; font-weight: 500; color: var(--text); margin-top: 2px; }
 
       /* SECTION CARDS */
-      .sc {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--r);
-        overflow: hidden;
-      }
-      .sc-hd {
-        padding: 9px 15px;
-        background: var(--surface2);
-        border-bottom: 1px solid var(--border);
-        font-size: 11px;
-        font-weight: 600;
-        color: var(--text2);
-        text-transform: uppercase;
-        letter-spacing: 0.6px;
-      }
-      .sc-bd {
-        padding: 15px;
-      }
+      .sc { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+      .sc-hd { padding: 9px 15px; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.6px; }
+      .sc-bd { padding: 15px; }
+      .fbox { background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 11px 14px; font-family: var(--mono); font-size: 14px; text-align: center; color: var(--teal); font-weight: 500; margin-bottom: 11px; }
+      .fleg { font-size: 12px; color: var(--text2); line-height: 2; }
+      .fleg code { font-family: var(--mono); background: var(--surface2); padding: 1px 5px; border-radius: 3px; color: var(--purple); font-size: 11px; }
+      .slist { display: flex; flex-direction: column; gap: 11px; }
+      .si { display: flex; gap: 10px; align-items: flex-start; }
+      .sn { width: 21px; height: 21px; border-radius: 50%; background: var(--teal-light); color: var(--teal); font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+      .st { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+      .sd { font-size: 12px; color: var(--text2); line-height: 1.6; }
+      .sv { font-family: var(--mono); font-size: 12px; color: var(--teal); background: var(--teal-light); display: inline-block; padding: 2px 7px; border-radius: 4px; margin-top: 4px; }
+      .ivlist { display: flex; flex-direction: column; gap: 5px; }
+      .ive { display: flex; align-items: center; justify-content: space-between; padding: 5px 9px; background: var(--bg); border-radius: 4px; font-size: 12px; }
+      .ivl { color: var(--text2); }
+      .ivv { font-family: var(--mono); font-weight: 500; color: var(--amber); }
+      .ivsum { display: flex; align-items: center; justify-content: space-between; padding: 7px 9px; background: var(--amber-light); border-radius: 4px; font-size: 12px; font-weight: 500; color: var(--amber); margin-top: 6px; }
+      .ivsum .ivsv { font-family: var(--mono); font-size: 13px; }
+      .itbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+      .itbl tr { border-bottom: 1px solid var(--border); }
+      .itbl tr:last-child { border-bottom: none; }
+      .itbl td { padding: 7px 10px; }
+      .itbl td:first-child { font-family: var(--mono); font-weight: 500; width: 120px; }
+      .itbl td:last-child { color: var(--text2); }
+      .cr td { background: var(--teal-light) !important; color: var(--teal) !important; font-weight: 600; }
+      [data-theme="dark"] .cr td { background: #04342c !important; color: #5dcaa5 !important; }
+      .pend { text-align: center; padding: 18px; color: var(--text3); font-size: 13px; font-style: italic; }
 
-      .fbox {
-        background: var(--bg);
-        border: 1px solid var(--border);
-        border-radius: var(--r-sm);
-        padding: 11px 14px;
-        font-family: var(--mono);
-        font-size: 14px;
-        text-align: center;
-        color: var(--teal);
-        font-weight: 500;
-        margin-bottom: 11px;
-      }
-      .fleg {
-        font-size: 12px;
-        color: var(--text2);
-        line-height: 2;
-      }
-      .fleg code {
-        font-family: var(--mono);
-        background: var(--surface2);
-        padding: 1px 5px;
-        border-radius: 3px;
-        color: var(--purple);
-        font-size: 11px;
-      }
+      /* AI CHATBOT */
+      .ai-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; grid-column: 1 / -1; display: flex; flex-direction: column; }
+      .ai-hd { padding: 12px 18px; background: linear-gradient(135deg, var(--ai-light) 0%, var(--surface2) 100%); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; flex-shrink: 0; }
+      .ai-hd-left { display: flex; align-items: center; gap: 10px; }
+      .ai-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--ai); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+      .ai-icon svg { width: 18px; height: 18px; color: #fff; }
+      .ai-hd-text h3 { font-family: var(--serif); font-size: 14px; font-weight: 600; color: var(--text); }
+      .ai-hd-text p { font-size: 11px; color: var(--text3); margin-top: 1px; }
+      .ai-hd-actions { display: flex; align-items: center; gap: 8px; }
+      .ai-verify-btn { display: flex; align-items: center; gap: 8px; padding: 9px 20px; background: var(--ai); color: #fff; border: none; border-radius: var(--r-sm); font-family: var(--sans); font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s, transform 0.1s, box-shadow 0.15s; white-space: nowrap; flex-shrink: 0; }
+      .ai-verify-btn:hover { background: var(--ai-mid); box-shadow: 0 4px 12px rgba(109,40,217,0.3); transform: translateY(-1px); }
+      .ai-verify-btn:active { transform: scale(0.98); }
+      .ai-verify-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+      .ai-verify-btn svg { width: 15px; height: 15px; }
+      .ai-reset-btn { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: transparent; color: var(--text3); border: 1px solid var(--border2); border-radius: var(--r-sm); font-family: var(--sans); font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+      .ai-reset-btn:hover { background: var(--surface2); color: var(--text2); }
+      .ai-reset-btn svg { width: 13px; height: 13px; }
 
-      .slist {
-        display: flex;
-        flex-direction: column;
-        gap: 11px;
-      }
-      .si {
-        display: flex;
-        gap: 10px;
-        align-items: flex-start;
-      }
-      .sn {
-        width: 21px;
-        height: 21px;
-        border-radius: 50%;
-        background: var(--teal-light);
-        color: var(--teal);
-        font-size: 11px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        margin-top: 1px;
-      }
-      .st {
-        font-size: 13px;
-        font-weight: 500;
-        color: var(--text);
-        margin-bottom: 2px;
-      }
-      .sd {
-        font-size: 12px;
-        color: var(--text2);
-        line-height: 1.6;
-      }
-      .sv {
-        font-family: var(--mono);
-        font-size: 12px;
-        color: var(--teal);
-        background: var(--teal-light);
-        display: inline-block;
-        padding: 2px 7px;
-        border-radius: 4px;
-        margin-top: 4px;
-      }
+      /* Chat area */
+      .ai-chat-area { display: flex; flex-direction: column; min-height: 0; }
+      .ai-messages { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; max-height: 500px; scroll-behavior: smooth; }
+      .ai-idle { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 32px 24px; text-align: center; color: var(--text3); }
+      .ai-idle svg { width: 36px; height: 36px; opacity: 0.3; }
+      .ai-idle p { font-size: 13px; line-height: 1.7; max-width: 320px; }
 
-      .ivlist {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-      }
-      .ive {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 5px 9px;
-        background: var(--bg);
-        border-radius: 4px;
-        font-size: 12px;
-      }
-      .ivl {
-        color: var(--text2);
-      }
-      .ivv {
-        font-family: var(--mono);
-        font-weight: 500;
-        color: var(--amber);
-      }
-      .ivsum {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 7px 9px;
-        background: var(--amber-light);
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: 500;
-        color: var(--amber);
-        margin-top: 6px;
-      }
-      .ivsum .ivsv {
-        font-family: var(--mono);
-        font-size: 13px;
-      }
+      /* Verdict card (pinned at top of chat) */
+      .ai-verdict { display: flex; align-items: center; gap: 14px; padding: 13px 16px; border-radius: var(--r); border: 1px solid; flex-shrink: 0; }
+      .ai-verdict.reliable { background: var(--teal-light); border-color: #9fe1cb; }
+      .ai-verdict.questionable { background: var(--amber-light); border-color: #f4c987; }
+      .ai-verdict.unreliable { background: #fcebeb; border-color: #f4aeae; }
+      [data-theme="dark"] .ai-verdict.reliable { background: #04342c; border-color: #085041; }
+      [data-theme="dark"] .ai-verdict.questionable { background: #412402; border-color: #6b3a05; }
+      [data-theme="dark"] .ai-verdict.unreliable { background: #501313; border-color: #7a1c1c; }
+      .ai-verdict-icon { font-size: 26px; flex-shrink: 0; }
+      .ai-verdict-text h4 { font-family: var(--serif); font-size: 15px; font-weight: 600; }
+      .ai-verdict-text p { font-size: 12px; color: var(--text2); margin-top: 1px; }
+      .ai-verdict.reliable .ai-verdict-text h4 { color: var(--teal); }
+      .ai-verdict.questionable .ai-verdict-text h4 { color: var(--amber); }
+      .ai-verdict.unreliable .ai-verdict-text h4 { color: #a32d2d; }
+      [data-theme="dark"] .ai-verdict.unreliable .ai-verdict-text h4 { color: #f09595; }
 
-      .itbl {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 12px;
-      }
-      .itbl tr {
-        border-bottom: 1px solid var(--border);
-      }
-      .itbl tr:last-child {
-        border-bottom: none;
-      }
-      .itbl td {
-        padding: 7px 10px;
-      }
-      .itbl td:first-child {
-        font-family: var(--mono);
-        font-weight: 500;
-        width: 120px;
-      }
-      .itbl td:last-child {
-        color: var(--text2);
-      }
-      .cr td {
-        background: var(--teal-light) !important;
-        color: var(--teal) !important;
-        font-weight: 600;
-      }
-      [data-theme="dark"] .cr td {
-        background: #04342c !important;
-        color: #5dcaa5 !important;
-      }
+      /* Chat bubbles */
+      .chat-msg { display: flex; gap: 9px; align-items: flex-end; animation: fadeUp 0.2s ease; }
+      @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+      .chat-msg.user { flex-direction: row-reverse; }
+      .chat-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; margin-bottom: 2px; }
+      .chat-avatar.ai-av { background: var(--ai); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: -0.5px; }
+      .chat-avatar.user-av { background: var(--surface2); border: 1px solid var(--border2); font-size: 13px; }
+      .chat-bubble { max-width: 82%; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.7; }
+      .chat-msg.ai .chat-bubble { background: var(--surface2); color: var(--text); border-bottom-left-radius: 4px; border: 1px solid var(--border); }
+      .chat-msg.user .chat-bubble { background: var(--ai); color: #fff; border-bottom-right-radius: 4px; }
+      .chat-bubble p { margin-bottom: 8px; }
+      .chat-bubble p:last-child { margin-bottom: 0; }
+      .chat-bubble ul, .chat-bubble ol { padding-left: 18px; margin: 6px 0; }
+      .chat-bubble li { margin-bottom: 4px; }
+      .chat-bubble strong { font-weight: 600; }
+      .chat-time { font-size: 10px; color: var(--text3); text-align: center; padding: 4px 0 2px; }
 
-      .pend {
-        text-align: center;
-        padding: 18px;
-        color: var(--text3);
-        font-size: 13px;
-        font-style: italic;
-      }
+      /* Typing indicator */
+      .typing-indicator { display: flex; gap: 9px; align-items: flex-end; }
+      .typing-dots { display: flex; gap: 4px; align-items: center; padding: 12px 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: 14px; border-bottom-left-radius: 4px; }
+      .typing-dots span { width: 7px; height: 7px; border-radius: 50%; background: var(--ai); animation: typingBounce 1.2s infinite; }
+      .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+      .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+      @keyframes typingBounce { 0%,60%,100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-5px); opacity: 1; } }
+
+      /* Suggested questions */
+      .ai-suggestions { padding: 0 18px 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+      .sugg-chip { padding: 6px 12px; background: var(--ai-light); color: var(--ai); border: 1px solid; border-color: color-mix(in srgb, var(--ai) 30%, transparent); border-radius: 20px; font-size: 11px; font-weight: 500; cursor: pointer; transition: all 0.15s; white-space: nowrap; font-family: var(--sans); }
+      .sugg-chip:hover { background: var(--ai); color: #fff; }
+
+      /* Chat input */
+      .ai-input-bar { border-top: 1px solid var(--border); padding: 12px 14px; display: flex; gap: 8px; align-items: flex-end; background: var(--surface); flex-shrink: 0; }
+      .ai-input-wrap { flex: 1; position: relative; }
+      .ai-textarea { width: 100%; padding: 9px 12px; border: 1px solid var(--border2); border-radius: 20px; font-family: var(--sans); font-size: 13px; color: var(--text); background: var(--bg); resize: none; outline: none; line-height: 1.5; max-height: 100px; overflow-y: auto; transition: border-color 0.15s; display: block; }
+      .ai-textarea:focus { border-color: var(--ai); background: var(--surface); }
+      [data-theme="dark"] .ai-textarea { background: var(--surface2); }
+      [data-theme="dark"] .ai-textarea:focus { background: var(--surface); }
+      .ai-send-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--ai); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s, transform 0.1s; }
+      .ai-send-btn:hover { background: var(--ai-mid); transform: scale(1.08); }
+      .ai-send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+      .ai-send-btn svg { width: 15px; height: 15px; }
+      .ai-input-hint { font-size: 10px; color: var(--text3); padding: 0 18px 10px; }
+
+      /* Loading / error */
+      .ai-loading { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 28px; text-align: center; }
+      .ai-spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--ai); border-radius: 50%; animation: spin 0.9s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .ai-loading-txt { font-size: 13px; color: var(--text2); }
+      .ai-loading-sub { font-size: 11px; color: var(--text3); }
+      .ai-error { background: #fcebeb; border: 1px solid #f4aeae; border-radius: var(--r-sm); padding: 14px; font-size: 13px; color: #a32d2d; margin: 14px 18px; }
+      [data-theme="dark"] .ai-error { background: #501313; border-color: #7a1c1c; color: #f09595; }
 
       @media (max-width: 600px) {
-        .wrap {
-          padding: 10px 12px;
-          gap: 12px;
-        }
-        .hdr {
-          padding: 11px 14px;
-        }
-        .hdr h1 {
-          font-size: 16px;
-        }
-        .hdr .sub {
-          display: none;
-        }
-        .cfg {
-          padding: 12px;
-          gap: 10px;
-        }
-        .cfg-title {
-          display: none;
-        }
-        .fld {
-          min-width: 110px;
-        }
-        .alpha-big .av {
-          font-size: 38px;
-        }
-        .tbl-scroll {
-          max-height: 42vh;
-        }
+        .wrap { padding: 10px 12px; gap: 12px; }
+        .hdr { padding: 11px 14px; }
+        .hdr h1 { font-size: 16px; }
+        .hdr .sub { display: none; }
+        .cfg { padding: 12px; gap: 10px; }
+        .cfg-title { display: none; }
+        .fld { min-width: 110px; }
+        .alpha-big .av { font-size: 38px; }
+        .tbl-scroll { max-height: 42vh; }
+        .dl-btns { gap: 6px; }
+        .dl-btn { padding: 7px 11px; font-size: 11px; }
       }
     </style>
   </head>
@@ -762,45 +276,59 @@
     </header>
 
     <div class="wrap">
+      <!-- CONFIG -->
       <div class="cfg">
         <span class="cfg-title">Setup</span>
         <div class="fld">
           <label>Respondents (N)</label>
-          <input
-            type="number"
-            id="numRespondents"
-            min="2"
-            placeholder="e.g. 30"
-          />
+          <input type="number" id="numRespondents" min="2" placeholder="e.g. 30"/>
         </div>
         <div class="fld">
           <label>Items (k)</label>
-          <input type="number" id="numItems" min="2" placeholder="e.g. 10" />
+          <input type="number" id="numItems" min="2" placeholder="e.g. 10"/>
         </div>
-        <button class="gen-btn" onclick="generateTable()">
-          Generate Table
-        </button>
+        <button class="gen-btn" onclick="generateTable()">Generate Table</button>
       </div>
 
-      <div class="tbl-card">
+      <!-- DOWNLOAD BAR -->
+      <div class="dl-bar">
+        <span class="dl-title">Export Results</span>
+        <div class="dl-btns">
+          <button class="dl-btn xlsx" onclick="downloadExcel()" title="Download as Excel (.xlsx)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Excel (.xlsx)
+          </button>
+          <button class="dl-btn docx" onclick="downloadWord()" title="Download as Word (.doc)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+            Word (.doc)
+          </button>
+          <button class="dl-btn pdf" onclick="downloadPDF()" title="Download as PDF">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 13h6M9 17h3"/></svg>
+            PDF
+          </button>
+          <button class="dl-btn png" onclick="downloadPNG()" title="Download as PNG image">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            PNG
+          </button>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="tbl-card" id="mainCard">
         <div class="tbl-hdr">
           <h2>Data Entry Matrix</h2>
-          <div class="prog-row" id="progRow" style="display: none">
-            <div class="prog-wrap">
-              <div class="prog-bar" id="progBar" style="width: 0%"></div>
-            </div>
+          <div class="prog-row" id="progRow" style="display:none">
+            <div class="prog-wrap"><div class="prog-bar" id="progBar" style="width:0%"></div></div>
             <span class="prog-lbl" id="progLbl">0 / 0</span>
           </div>
         </div>
         <div id="tblContainer">
-          <div class="empty-state">
-            Enter the number of respondents and items above, then click
-            <strong>Generate Table</strong>.
-          </div>
+          <div class="empty-state">Enter the number of respondents and items above, then click <strong>Generate Table</strong>.</div>
         </div>
       </div>
 
-      <div class="bot">
+      <!-- RESULTS GRID -->
+      <div class="bot" id="resultsGrid">
         <div class="hero">
           <div class="alpha-big">
             <div class="al">Cronbach's α</div>
@@ -808,22 +336,10 @@
             <span class="abadge b-na" id="alphaBadge">Awaiting data</span>
           </div>
           <div class="mstrip">
-            <div class="mpill">
-              <div class="mpl">Items (k)</div>
-              <div class="mpv" id="mK">—</div>
-            </div>
-            <div class="mpill">
-              <div class="mpl">Respondents (N)</div>
-              <div class="mpv" id="mN">—</div>
-            </div>
-            <div class="mpill">
-              <div class="mpl">Σ Item Variances</div>
-              <div class="mpv" id="mSumVar">—</div>
-            </div>
-            <div class="mpill">
-              <div class="mpl">Total Variance</div>
-              <div class="mpv" id="mTotalVar">—</div>
-            </div>
+            <div class="mpill"><div class="mpl">Items (k)</div><div class="mpv" id="mK">—</div></div>
+            <div class="mpill"><div class="mpl">Respondents (N)</div><div class="mpv" id="mN">—</div></div>
+            <div class="mpill"><div class="mpl">Σ Item Variances</div><div class="mpv" id="mSumVar">—</div></div>
+            <div class="mpill"><div class="mpl">Total Variance</div><div class="mpv" id="mTotalVar">—</div></div>
           </div>
         </div>
 
@@ -832,10 +348,10 @@
           <div class="sc-bd">
             <div class="fbox">α = (k / (k − 1)) × (1 − Σσ²ᵢ / σ²ₜ)</div>
             <div class="fleg">
-              <code>k</code> — Number of items in the scale<br />
-              <code>σ²ᵢ</code> — Population variance of each item<br />
-              <code>Σσ²ᵢ</code> — Sum of all item variances<br />
-              <code>σ²ₜ</code> — Variance of the total composite scores<br />
+              <code>k</code> — Number of items in the scale<br/>
+              <code>σ²ᵢ</code> — Population variance of each item<br/>
+              <code>Σσ²ᵢ</code> — Sum of all item variances<br/>
+              <code>σ²ₜ</code> — Variance of the total composite scores<br/>
               <code>α</code> — Cronbach's Alpha (0 to 1)
             </div>
           </div>
@@ -846,30 +362,12 @@
           <div class="sc-bd">
             <table class="itbl">
               <tbody>
-                <tr id="ir-ex">
-                  <td>α ≥ 0.90</td>
-                  <td>Excellent</td>
-                </tr>
-                <tr id="ir-gd">
-                  <td>0.80 ≤ α &lt; 0.90</td>
-                  <td>Good</td>
-                </tr>
-                <tr id="ir-ac">
-                  <td>0.70 ≤ α &lt; 0.80</td>
-                  <td>Acceptable</td>
-                </tr>
-                <tr id="ir-qu">
-                  <td>0.60 ≤ α &lt; 0.70</td>
-                  <td>Questionable</td>
-                </tr>
-                <tr id="ir-po">
-                  <td>0.50 ≤ α &lt; 0.60</td>
-                  <td>Poor</td>
-                </tr>
-                <tr id="ir-un">
-                  <td>α &lt; 0.50</td>
-                  <td>Unacceptable</td>
-                </tr>
+                <tr id="ir-ex"><td>α ≥ 0.90</td><td>Excellent</td></tr>
+                <tr id="ir-gd"><td>0.80 ≤ α &lt; 0.90</td><td>Good</td></tr>
+                <tr id="ir-ac"><td>0.70 ≤ α &lt; 0.80</td><td>Acceptable</td></tr>
+                <tr id="ir-qu"><td>0.60 ≤ α &lt; 0.70</td><td>Questionable</td></tr>
+                <tr id="ir-po"><td>0.50 ≤ α &lt; 0.60</td><td>Poor</td></tr>
+                <tr id="ir-un"><td>α &lt; 0.50</td><td>Unacceptable</td></tr>
               </tbody>
             </table>
           </div>
@@ -878,80 +376,78 @@
         <div class="sc">
           <div class="sc-hd">Step-by-Step Solution</div>
           <div class="sc-bd">
-            <div class="slist" id="stepList">
-              <div class="pend">
-                Fill in the table to see the full solution.
-              </div>
-            </div>
+            <div class="slist" id="stepList"><div class="pend">Fill in the table to see the full solution.</div></div>
           </div>
         </div>
 
         <div class="sc">
           <div class="sc-hd">Item Variances Breakdown</div>
-          <div class="sc-bd" id="ivBreakdown">
-            <div class="pend">No data yet.</div>
+          <div class="sc-bd" id="ivBreakdown"><div class="pend">No data yet.</div></div>
+        </div>
+
+        <!-- AI CHATBOT -->
+        <div class="ai-section">
+          <div class="ai-hd">
+            <div class="ai-hd-left">
+              <div class="ai-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+              </div>
+              <div class="ai-hd-text">
+                <h3>AI Reliability Analyst</h3>
+                <p>Powered by Pollinations AI — free, no login, no API key needed</p>
+              </div>
+            </div>
+            <div class="ai-hd-actions">
+              <button class="ai-reset-btn" id="aiResetBtn" onclick="resetChat()" style="display:none">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4"/></svg>
+                New Chat
+              </button>
+              <button class="ai-verify-btn" id="aiVerifyBtn" onclick="verifyWithAI()" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Verify with AI
+              </button>
+            </div>
+          </div>
+
+          <div class="ai-chat-area" id="aiChatArea">
+            <div class="ai-messages" id="aiMessages">
+              <div class="ai-idle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                <p>Complete the data matrix and calculate Cronbach's Alpha, then click <strong>Verify with AI</strong> to start the analysis. You can ask follow-up questions afterwards.</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <script>
-      // Disable Right-click
-      document.addEventListener("contextmenu", (e) => e.preventDefault());
 
-      // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-      document.onkeydown = function (e) {
-        if (
-          e.keyCode === 123 || // F12
-          (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || // Ctrl+Shift+I/J
-          (e.ctrlKey && e.keyCode === 85) // Ctrl+U (View Source)
-        ) {
-          return false;
-        }
-      };
-    </script>
     <script>
-      var nR = 0,
-        nI = 0;
+      var nR = 0, nI = 0;
+      var lastAlpha = null, lastStats = null;
 
       function generateTable() {
         nR = parseInt(document.getElementById("numRespondents").value) || 0;
         nI = parseInt(document.getElementById("numItems").value) || 0;
-        if (nR < 2 || nI < 2) {
-          alert("Please enter at least 2 respondents and 2 items.");
-          return;
-        }
-
+        if (nR < 2 || nI < 2) { alert("Please enter at least 2 respondents and 2 items."); return; }
         document.getElementById("mK").textContent = nI;
         document.getElementById("mN").textContent = nR;
-
         var h = '<div class="tbl-scroll"><table><thead><tr><th>Resp.</th>';
         for (var j = 1; j <= nI; j++) h += "<th>Item " + j + "</th>";
         h += '<th class="tc">Total</th></tr></thead><tbody>';
         for (var i = 1; i <= nR; i++) {
           h += "<tr><td>R" + i + "</td>";
           for (var j = 1; j <= nI; j++) {
-            h +=
-              '<td><input class="ci" type="number" id="c_' +
-              i +
-              "_" +
-              j +
-              '" step="any"' +
-              ' oninput="onInput()" onkeydown="nav(event,' +
-              i +
-              "," +
-              j +
-              ')"' +
-              ' autocomplete="off"></td>';
+            h += '<td><input class="ci" type="number" id="c_' + i + "_" + j + '" step="any" oninput="onInput()" onkeydown="nav(event,' + i + "," + j + ')" autocomplete="off"></td>';
           }
           h += '<td class="tc" id="rt_' + i + '">—</td></tr>';
         }
-        h += "</tbody><tfoot>" + "<tr><td>Mean</td>";
+        h += "</tbody><tfoot><tr><td>Mean</td>";
         for (var j = 1; j <= nI; j++) h += '<td id="cm_' + j + '">—</td>';
-        h += '<td class="tc" id="tm">—</td></tr>' + "<tr><td>Var s²</td>";
-        for (var j = 1; j <= nI; j++)
-          h += '<td class="vc" id="cv_' + j + '">—</td>';
-        h += '<td class="tc" id="tv">—</td></tr>' + "</tfoot></table></div>";
-
+        h += '<td class="tc" id="tm">—</td></tr><tr><td>Var s²</td>';
+        for (var j = 1; j <= nI; j++) h += '<td class="vc" id="cv_' + j + '">—</td>';
+        h += '<td class="tc" id="tv">—</td></tr></tfoot></table></div>';
         document.getElementById("tblContainer").innerHTML = h;
         document.getElementById("progRow").style.display = "flex";
         updateProg();
@@ -959,8 +455,7 @@
       }
 
       function nav(e, i, j) {
-        var ni = i,
-          nj = j;
+        var ni = i, nj = j;
         if (e.key === "ArrowRight") nj = Math.min(nI, j + 1);
         else if (e.key === "ArrowLeft") nj = Math.max(1, j - 1);
         else if (e.key === "ArrowDown") ni = Math.min(nR, i + 1);
@@ -986,34 +481,19 @@
       }
 
       function updateProg() {
-        var d = getVals(),
-          filled = 0,
-          total = nR * nI;
-        for (var i = 0; i < d.length; i++)
-          for (var j = 0; j < d[i].length; j++) if (d[i][j] !== null) filled++;
+        var d = getVals(), filled = 0, total = nR * nI;
+        for (var i = 0; i < d.length; i++) for (var j = 0; j < d[i].length; j++) if (d[i][j] !== null) filled++;
         var pct = total > 0 ? (filled / total) * 100 : 0;
         document.getElementById("progBar").style.width = pct.toFixed(1) + "%";
         document.getElementById("progLbl").textContent = filled + " / " + total;
       }
 
-      function avg(arr) {
-        return (
-          arr.reduce(function (a, b) {
-            return a + b;
-          }, 0) / arr.length
-        );
-      }
+      function avg(arr) { return arr.reduce(function(a,b){return a+b;},0)/arr.length; }
 
-      // ENHANCED: Calculates Sample Variance to mimic Excel's VAR.S
       function vari(arr) {
         if (arr.length < 2) return 0;
         var m = avg(arr);
-        return (
-          arr.reduce(function (s, x) {
-            return s + Math.pow(x - m, 2);
-          }, 0) /
-          (arr.length - 1) // Changed from arr.length to N-1
-        );
+        return arr.reduce(function(s,x){return s+Math.pow(x-m,2);},0) / (arr.length - 1);
       }
 
       function onInput() {
@@ -1021,17 +501,9 @@
         var d = getVals();
         rowTotals(d);
         footerStats(d);
-        var comp = d.filter(function (r) {
-          return r.every(function (v) {
-            return v !== null;
-          });
-        });
+        var comp = d.filter(function(r){return r.every(function(v){return v!==null;});});
         if (comp.length >= 2) {
-          var allFull = d.every(function (r) {
-            return r.every(function (v) {
-              return v !== null;
-            });
-          });
+          var allFull = d.every(function(r){return r.every(function(v){return v!==null;});});
           calcAlpha(comp, !allFull);
         } else {
           resetResults();
@@ -1042,30 +514,16 @@
         for (var i = 0; i < nR; i++) {
           var el = document.getElementById("rt_" + (i + 1));
           if (!el) continue;
-          var full = d[i].every(function (v) {
-            return v !== null;
-          });
-          el.textContent = full
-            ? d[i]
-                .reduce(function (a, b) {
-                  return a + b;
-                }, 0)
-                .toFixed(2)
-            : "—";
+          var full = d[i].every(function(v){return v!==null;});
+          el.textContent = full ? d[i].reduce(function(a,b){return a+b;},0).toFixed(2) : "—";
         }
       }
 
       function footerStats(d) {
         for (var j = 0; j < nI; j++) {
-          var col = d
-            .map(function (r) {
-              return r[j];
-            })
-            .filter(function (v) {
-              return v !== null;
-            });
-          var me = document.getElementById("cm_" + (j + 1));
-          var ve = document.getElementById("cv_" + (j + 1));
+          var col = d.map(function(r){return r[j];}).filter(function(v){return v!==null;});
+          var me = document.getElementById("cm_" + (j+1));
+          var ve = document.getElementById("cv_" + (j+1));
           if (col.length > 1) {
             if (me) me.textContent = avg(col).toFixed(3);
             if (ve) ve.textContent = vari(col).toFixed(4);
@@ -1074,250 +532,696 @@
             if (ve) ve.textContent = "—";
           }
         }
-        var ct = d
-          .filter(function (r) {
-            return r.every(function (v) {
-              return v !== null;
-            });
-          })
-          .map(function (r) {
-            return r.reduce(function (a, b) {
-              return a + b;
-            }, 0);
-          });
-        var tme = document.getElementById("tm"),
-          tve = document.getElementById("tv");
-        if (ct.length > 1) {
-          if (tme) tme.textContent = avg(ct).toFixed(3);
-          if (tve) tve.textContent = vari(ct).toFixed(4);
-        } else {
-          if (tme) tme.textContent = "—";
-          if (tve) tve.textContent = "—";
-        }
+        var ct = d.filter(function(r){return r.every(function(v){return v!==null;});}).map(function(r){return r.reduce(function(a,b){return a+b;},0);});
+        var tme = document.getElementById("tm"), tve = document.getElementById("tv");
+        if (ct.length > 1) { if (tme) tme.textContent = avg(ct).toFixed(3); if (tve) tve.textContent = vari(ct).toFixed(4); }
+        else { if (tme) tme.textContent = "—"; if (tve) tve.textContent = "—"; }
       }
 
       function calcAlpha(d, partial) {
-        var k = nI,
-          N = d.length;
+        var k = nI, N = d.length;
         var ivars = [];
         for (var j = 0; j < k; j++) {
-          var col = d
-            .map(function (r) {
-              return r[j];
-            })
-            .filter(function (v) {
-              return v !== null;
-            });
+          var col = d.map(function(r){return r[j];}).filter(function(v){return v!==null;});
           ivars.push(col.length >= 2 ? vari(col) : 0);
         }
-        var tots = d.map(function (r) {
-          return r.reduce(function (a, b) {
-            return a + b;
-          }, 0);
-        });
+        var tots = d.map(function(r){return r.reduce(function(a,b){return a+b;},0);});
         var tvar = vari(tots);
-        var siv = ivars.reduce(function (a, b) {
-          return a + b;
-        }, 0);
-
+        var siv = ivars.reduce(function(a,b){return a+b;},0);
         document.getElementById("mSumVar").textContent = siv.toFixed(4);
         document.getElementById("mTotalVar").textContent = tvar.toFixed(4);
-
-        if (tvar <= 0) {
-          resetResults();
-          return;
-        }
-
+        if (tvar <= 0) { resetResults(); return; }
         var alpha = (k / (k - 1)) * (1 - siv / tvar);
         document.getElementById("alphaValue").textContent = alpha.toFixed(4);
         setBadge(alpha, partial);
         setSteps(k, N, ivars, siv, tvar, alpha, tots, partial);
         setIVBreak(ivars, siv);
         setInterp(alpha);
+        lastAlpha = alpha;
+        lastStats = { k: k, N: N, ivars: ivars, siv: siv, tvar: tvar, partial: partial };
+        if (!partial) {
+          var btn = document.getElementById("aiVerifyBtn");
+          btn.disabled = false;
+        }
       }
 
       function setBadge(a, partial) {
         var cls, lbl;
-        if (a >= 0.9) {
-          cls = "b-ex";
-          lbl = "Excellent";
-        } else if (a >= 0.8) {
-          cls = "b-gd";
-          lbl = "Good";
-        } else if (a >= 0.7) {
-          cls = "b-ac";
-          lbl = "Acceptable";
-        } else if (a >= 0.6) {
-          cls = "b-qu";
-          lbl = "Questionable";
-        } else if (a >= 0.5) {
-          cls = "b-po";
-          lbl = "Poor";
-        } else {
-          cls = "b-un";
-          lbl = "Unacceptable";
-        }
+        if (a >= 0.9) { cls = "b-ex"; lbl = "Excellent"; }
+        else if (a >= 0.8) { cls = "b-gd"; lbl = "Good"; }
+        else if (a >= 0.7) { cls = "b-ac"; lbl = "Acceptable"; }
+        else if (a >= 0.6) { cls = "b-qu"; lbl = "Questionable"; }
+        else if (a >= 0.5) { cls = "b-po"; lbl = "Poor"; }
+        else { cls = "b-un"; lbl = "Unacceptable"; }
         var el = document.getElementById("alphaBadge");
         el.className = "abadge " + cls;
         el.textContent = lbl + (partial ? " (partial)" : "");
       }
 
       function setSteps(k, N, ivars, siv, tvar, alpha, tots, partial) {
-        var vlist = ivars
-          .map(function (v, i) {
-            return "s²<sub>" + (i + 1) + "</sub> = " + v.toFixed(4);
-          })
-          .join(", ");
+        var vlist = ivars.map(function(v,i){return "s²<sub>"+(i+1)+"</sub> = "+v.toFixed(4);}).join(", ");
         var rm = avg(tots);
         document.getElementById("stepList").innerHTML =
-          step(
-            1,
-            "Identify Parameters",
-            "Number of items <b>k = " +
-              k +
-              "</b>, respondents <b>N = " +
-              N +
-              "</b>" +
-              (partial ? " (complete rows only)" : "") +
-              ".",
-            "",
-          ) +
-          step(
-            2,
-            "Compute Each Item's Variance (s²ᵢ)",
-            "Sample variance formula (Matches Excel VAR.S): s²ᵢ = Σ(xᵢ − x̄)² / (N−1)<br><br>" +
-              vlist,
-            "",
-          ) +
-          step(
-            3,
-            "Sum All Item Variances (Σs²ᵢ)",
-            "Add all item variances from Step 2.",
-            "Σs²ᵢ = " + siv.toFixed(4),
-          ) +
-          step(
-            4,
-            "Compute Total Score Variance (s²ₜ)",
-            "Row sums = total scores T; compute variance of T.<br>Mean total = " +
-              rm.toFixed(3) +
-              ".",
-            "s²ₜ = " + tvar.toFixed(4),
-          ) +
-          step(
-            5,
-            "Apply Cronbach's Alpha Formula",
-            "α = (k/(k−1)) × (1−Σs²ᵢ/s²ₜ)<br>" +
-              "α = (" +
-              k +
-              "/" +
-              (k - 1) +
-              ") × (1−" +
-              siv.toFixed(4) +
-              "/" +
-              tvar.toFixed(4) +
-              ")<br>" +
-              "α = " +
-              (k / (k - 1)).toFixed(4) +
-              " × " +
-              (1 - siv / tvar).toFixed(4),
-            "α = " + alpha.toFixed(4),
-          );
+          step(1,"Identify Parameters","Number of items <b>k = "+k+"</b>, respondents <b>N = "+N+"</b>"+(partial?" (complete rows only)":"")+".","")+
+          step(2,"Compute Each Item's Variance (s²ᵢ)","Sample variance formula (Matches Excel VAR.S): s²ᵢ = Σ(xᵢ − x̄)² / (N−1)<br><br>"+vlist,"")+
+          step(3,"Sum All Item Variances (Σs²ᵢ)","Add all item variances from Step 2.","Σs²ᵢ = "+siv.toFixed(4))+
+          step(4,"Compute Total Score Variance (s²ₜ)","Row sums = total scores T; compute variance of T.<br>Mean total = "+rm.toFixed(3)+".","s²ₜ = "+tvar.toFixed(4))+
+          step(5,"Apply Cronbach's Alpha Formula","α = (k/(k−1)) × (1−Σs²ᵢ/s²ₜ)<br>α = ("+k+"/"+(k-1)+") × (1−"+siv.toFixed(4)+"/"+tvar.toFixed(4)+")<br>α = "+(k/(k-1)).toFixed(4)+" × "+(1-siv/tvar).toFixed(4),"α = "+alpha.toFixed(4));
       }
 
       function step(n, title, desc, val) {
-        return (
-          '<div class="si"><div class="sn">' +
-          n +
-          '</div><div class="step-content">' +
-          '<div class="st">' +
-          title +
-          "</div>" +
-          '<div class="sd">' +
-          desc +
-          "</div>" +
-          (val ? '<div class="sv">' + val + "</div>" : "") +
-          "</div></div>"
-        );
+        return '<div class="si"><div class="sn">'+n+'</div><div class="step-content"><div class="st">'+title+'</div><div class="sd">'+desc+'</div>'+(val?'<div class="sv">'+val+'</div>':'')+' </div></div>';
       }
 
       function setIVBreak(ivars, siv) {
         var h = '<div class="ivlist">';
         for (var i = 0; i < ivars.length; i++) {
-          h +=
-            '<div class="ive"><span class="ivl">Item ' +
-            (i + 1) +
-            " s²</span>" +
-            '<span class="ivv">' +
-            ivars[i].toFixed(4) +
-            "</span></div>";
+          h += '<div class="ive"><span class="ivl">Item '+(i+1)+" s²</span><span class=\"ivv\">"+ivars[i].toFixed(4)+"</span></div>";
         }
-        h +=
-          '</div><div class="ivsum"><span>Σ Item Variances</span>' +
-          '<span class="ivsv">' +
-          siv.toFixed(4) +
-          "</span></div>";
+        h += '</div><div class="ivsum"><span>Σ Item Variances</span><span class="ivsv">'+siv.toFixed(4)+"</span></div>";
         document.getElementById("ivBreakdown").innerHTML = h;
       }
 
       function setInterp(a) {
-        var ids = ["ex", "gd", "ac", "qu", "po", "un"];
-        for (var i = 0; i < ids.length; i++) {
-          var el = document.getElementById("ir-" + ids[i]);
-          if (el) el.classList.remove("cr");
-        }
+        var ids = ["ex","gd","ac","qu","po","un"];
+        for (var i = 0; i < ids.length; i++) { var el = document.getElementById("ir-"+ids[i]); if (el) el.classList.remove("cr"); }
         var w;
-        if (a >= 0.9) w = "ex";
-        else if (a >= 0.8) w = "gd";
-        else if (a >= 0.7) w = "ac";
-        else if (a >= 0.6) w = "qu";
-        else if (a >= 0.5) w = "po";
-        else w = "un";
-        var el = document.getElementById("ir-" + w);
-        if (el) el.classList.add("cr");
+        if (a >= 0.9) w="ex"; else if (a >= 0.8) w="gd"; else if (a >= 0.7) w="ac";
+        else if (a >= 0.6) w="qu"; else if (a >= 0.5) w="po"; else w="un";
+        var el = document.getElementById("ir-"+w); if (el) el.classList.add("cr");
       }
 
       function resetResults() {
         document.getElementById("alphaValue").textContent = "—";
-        var b = document.getElementById("alphaBadge");
-        b.className = "abadge b-na";
-        b.textContent = "Fill in all cells";
+        var b = document.getElementById("alphaBadge"); b.className = "abadge b-na"; b.textContent = "Fill in all cells";
         document.getElementById("mSumVar").textContent = "—";
         document.getElementById("mTotalVar").textContent = "—";
-        document.getElementById("stepList").innerHTML =
-          '<div class="pend">Fill in the table to see the solution.</div>';
-        document.getElementById("ivBreakdown").innerHTML =
-          '<div class="pend">No data yet.</div>';
-        var ids = ["ex", "gd", "ac", "qu", "po", "un"];
-        for (var i = 0; i < ids.length; i++) {
-          var el = document.getElementById("ir-" + ids[i]);
-          if (el) el.classList.remove("cr");
+        document.getElementById("stepList").innerHTML = '<div class="pend">Fill in the table to see the solution.</div>';
+        document.getElementById("ivBreakdown").innerHTML = '<div class="pend">No data yet.</div>';
+        var ids = ["ex","gd","ac","qu","po","un"];
+        for (var i = 0; i < ids.length; i++) { var el = document.getElementById("ir-"+ids[i]); if (el) el.classList.remove("cr"); }
+        lastAlpha = null; lastStats = null;
+        document.getElementById("aiVerifyBtn").disabled = true;
+        document.getElementById("aiBd").innerHTML = '<div class="ai-idle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><p>Complete the data matrix and calculate Cronbach\'s Alpha, then click <strong>Verify with AI</strong> to get an expert analysis.</p></div>';
+      }
+
+      /* ─── AI CHATBOT ─── */
+      var chatHistory = [];
+      var aiSystemPrompt = "";
+      var aiTyping = false;
+
+      var SUGGESTIONS = [
+        "Is this alpha reliable enough for my thesis?",
+        "Which items have the highest variance?",
+        "What sample size do I need for a better result?",
+        "How can I improve the reliability?",
+        "What does this mean for my research validity?",
+        "Should I remove any items from the scale?"
+      ];
+
+      function buildSystemPrompt() {
+        if (!lastStats) return "";
+        var s = lastStats;
+        var alphaLabel = lastAlpha >= 0.9 ? "Excellent" : lastAlpha >= 0.8 ? "Good" : lastAlpha >= 0.7 ? "Acceptable" : lastAlpha >= 0.6 ? "Questionable" : lastAlpha >= 0.5 ? "Poor" : "Unacceptable";
+        var ivarsList = s.ivars.map(function(v,i){ return "Item "+(i+1)+": "+v.toFixed(4); }).join(", ");
+        return "You are an expert psychometrician and research consultant specializing in Cronbach's Alpha and scale reliability. " +
+          "The user has computed Cronbach's Alpha for their survey/questionnaire instrument. Here are their exact results:\n\n" +
+          "- Cronbach's Alpha (α): " + lastAlpha.toFixed(4) + " (" + alphaLabel + ")\n" +
+          "- Number of Items (k): " + s.k + "\n" +
+          "- Number of Respondents (N): " + s.N + "\n" +
+          "- Sum of Item Variances (Σs²ᵢ): " + s.siv.toFixed(4) + "\n" +
+          "- Total Score Variance (s²ₜ): " + s.tvar.toFixed(4) + "\n" +
+          "- Individual Item Variances: " + ivarsList + "\n" +
+          "- Data completeness: " + (s.partial ? "Partial — some missing values" : "Complete") + "\n\n" +
+          "Answer all questions based on these specific numbers. Be concise, helpful, and academically precise. " +
+          "Use plain text with occasional bullet points when listing. Do NOT use markdown headers or excessive formatting. " +
+          "Keep responses focused and under 200 words unless a detailed explanation is truly needed.";
+      }
+
+      async function verifyWithAI() {
+        if (lastAlpha === null || lastStats === null) return;
+        var btn = document.getElementById("aiVerifyBtn");
+        btn.disabled = true;
+        aiSystemPrompt = buildSystemPrompt();
+        chatHistory = [];
+
+        var msgs = document.getElementById("aiMessages");
+        msgs.innerHTML = "";
+
+        // Show loading inside messages
+        var loadDiv = document.createElement("div");
+        loadDiv.className = "ai-loading";
+        loadDiv.id = "aiInitLoad";
+        loadDiv.innerHTML = '<div class="ai-spinner"></div><div class="ai-loading-txt">Analyzing your results…</div><div class="ai-loading-sub">Evaluating reliability, variance structure, and recommendations</div>';
+        msgs.appendChild(loadDiv);
+
+        var s = lastStats;
+        var alphaLabel = lastAlpha >= 0.9 ? "Excellent" : lastAlpha >= 0.8 ? "Good" : lastAlpha >= 0.7 ? "Acceptable" : lastAlpha >= 0.6 ? "Questionable" : lastAlpha >= 0.5 ? "Poor" : "Unacceptable";
+        var ivarsList = s.ivars.map(function(v,i){return "Item "+(i+1)+": "+v.toFixed(4);}).join(", ");
+
+        var initPrompt = "Please analyze these Cronbach's Alpha results. Respond ONLY with valid JSON (no markdown, no backticks):\n" +
+          "{\"verdict\":\"reliable|questionable|unreliable\",\"verdictTitle\":\"Short title max 8 words\",\"verdictSubtitle\":\"One sentence summary\",\"summary\":\"2-3 sentence plain text overview of the results including what the alpha means, item variance insights, and key implication for research\"," +
+          "\"recommendations\":[{\"icon\":\"💡\",\"text\":\"rec1\"},{\"icon\":\"📊\",\"text\":\"rec2\"},{\"icon\":\"✅\",\"text\":\"rec3\"}]}\n\n" +
+          "Data: α=" + lastAlpha.toFixed(4) + " ("+alphaLabel+"), k="+s.k+", N="+s.N+", Σs²ᵢ="+s.siv.toFixed(4)+", s²ₜ="+s.tvar.toFixed(4)+", Items: "+ivarsList;
+
+        try {
+          var response = await fetch("https://text.pollinations.ai/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              messages: [
+                { role: "system", content: aiSystemPrompt + "\n\nFor the initial analysis only, respond ONLY with valid JSON. No markdown. No backticks." },
+                { role: "user", content: initPrompt }
+              ],
+              model: "openai",
+              jsonMode: true,
+              seed: Math.floor(Math.random() * 9999)
+            })
+          });
+          var raw = await response.text();
+          var clean = raw.replace(/```json|```/g,"").trim();
+          var parsed = JSON.parse(clean);
+
+          // Store the initial analysis in chat history as a readable text
+          var initSummaryForHistory = "I've analyzed your Cronbach's Alpha results (α = " + lastAlpha.toFixed(4) + ", " + alphaLabel + ").\n\n" + (parsed.summary || "") +
+            "\n\nRecommendations:\n" + (parsed.recommendations||[]).map(function(r){return r.icon+" "+r.text;}).join("\n");
+          chatHistory.push({ role: "assistant", content: initSummaryForHistory });
+
+          renderInitialResult(parsed);
+        } catch(err) {
+          msgs.innerHTML = '<div class="ai-error">⚠️ Could not connect to AI. The free service may be busy — please try again in a moment.<br><small>'+( err.message||"Unknown error")+'</small></div>';
+          btn.disabled = false;
         }
       }
 
-      function toggleTheme() {
-        var isDark =
-          document.documentElement.getAttribute("data-theme") === "dark";
-        document.documentElement.setAttribute(
-          "data-theme",
-          isDark ? "light" : "dark",
-        );
-        document.getElementById("themeIcon").textContent = isDark ? "☀" : "☾";
-        document.getElementById("themeLabel").textContent = isDark
-          ? "Light mode"
-          : "Dark mode";
-        try {
-          localStorage.setItem("ca-theme", isDark ? "light" : "dark");
-        } catch (e) {}
+      function renderInitialResult(r) {
+        var verdictClass = r.verdict === "reliable" ? "reliable" : r.verdict === "questionable" ? "questionable" : "unreliable";
+        var verdictEmoji = r.verdict === "reliable" ? "✅" : r.verdict === "questionable" ? "⚠️" : "❌";
+        var msgs = document.getElementById("aiMessages");
+        msgs.innerHTML = "";
+
+        // Verdict card
+        var card = document.createElement("div");
+        card.className = "ai-verdict " + verdictClass;
+        card.innerHTML = '<span class="ai-verdict-icon">'+verdictEmoji+'</span><div class="ai-verdict-text"><h4>'+r.verdictTitle+'</h4><p>'+r.verdictSubtitle+'</p></div>';
+        msgs.appendChild(card);
+
+        // Time stamp
+        appendTimestamp(msgs);
+
+        // AI bubble with summary
+        var summaryText = (r.summary || "") + "\n\n" +
+          (r.recommendations||[]).map(function(rec){ return rec.icon + " " + rec.text; }).join("\n");
+        appendAIBubble(msgs, summaryText);
+
+        // Suggestions
+        renderSuggestions();
+
+        // Show input bar + reset button
+        renderInputBar();
+        document.getElementById("aiResetBtn").style.display = "flex";
+        document.getElementById("aiVerifyBtn").style.display = "none";
+
+        msgs.scrollTop = msgs.scrollHeight;
       }
 
-      (function () {
+      function renderSuggestions() {
+        var existing = document.getElementById("aiSuggestions");
+        if (existing) existing.remove();
+        var area = document.getElementById("aiChatArea");
+        var bar = document.getElementById("aiInputBar");
+        var div = document.createElement("div");
+        div.className = "ai-suggestions";
+        div.id = "aiSuggestions";
+        SUGGESTIONS.slice(0,4).forEach(function(q) {
+          var chip = document.createElement("button");
+          chip.className = "sugg-chip";
+          chip.textContent = q;
+          chip.onclick = function() { sendWithText(q); };
+          div.appendChild(chip);
+        });
+        if (bar) { area.insertBefore(div, bar); } else { area.appendChild(div); }
+      }
+
+      function renderInputBar() {
+        if (document.getElementById("aiInputBar")) return;
+        var area = document.getElementById("aiChatArea");
+        var bar = document.createElement("div");
+        bar.className = "ai-input-bar";
+        bar.id = "aiInputBar";
+        bar.innerHTML =
+          '<div class="ai-input-wrap">' +
+          '<textarea class="ai-textarea" id="aiTextarea" rows="1" placeholder="Ask a follow-up question…" onkeydown="handleChatKey(event)" oninput="autoResize(this)"></textarea>' +
+          '</div>' +
+          '<button class="ai-send-btn" id="aiSendBtn" onclick="sendChatMessage()" title="Send">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>' +
+          '</button>';
+        area.appendChild(bar);
+        var hint = document.createElement("div");
+        hint.className = "ai-input-hint";
+        hint.id = "aiInputHint";
+        hint.textContent = "Press Enter to send · Shift+Enter for new line · Powered by Pollinations AI (free)";
+        area.appendChild(hint);
+        setTimeout(function(){ var t=document.getElementById("aiTextarea"); if(t) t.focus(); }, 100);
+      }
+
+      function autoResize(el) {
+        el.style.height = "auto";
+        el.style.height = Math.min(el.scrollHeight, 100) + "px";
+      }
+
+      function handleChatKey(e) {
+        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
+      }
+
+      function sendWithText(text) {
+        var ta = document.getElementById("aiTextarea");
+        if (ta) { ta.value = text; autoResize(ta); }
+        sendChatMessage();
+      }
+
+      async function sendChatMessage() {
+        if (aiTyping) return;
+        var ta = document.getElementById("aiTextarea");
+        var sendBtn = document.getElementById("aiSendBtn");
+        var text = ta ? ta.value.trim() : "";
+        if (!text) return;
+
+        // Remove suggestions
+        var sugg = document.getElementById("aiSuggestions");
+        if (sugg) sugg.remove();
+
+        ta.value = "";
+        ta.style.height = "auto";
+        aiTyping = true;
+        if (sendBtn) sendBtn.disabled = true;
+
+        var msgs = document.getElementById("aiMessages");
+
+        // User bubble
+        appendUserBubble(msgs, text);
+        chatHistory.push({ role: "user", content: text });
+        msgs.scrollTop = msgs.scrollHeight;
+
+        // Typing indicator
+        var typingId = "typing_" + Date.now();
+        var typingEl = document.createElement("div");
+        typingEl.className = "typing-indicator";
+        typingEl.id = typingId;
+        typingEl.innerHTML = '<div class="chat-avatar ai-av">AI</div><div class="typing-dots"><span></span><span></span><span></span></div>';
+        msgs.appendChild(typingEl);
+        msgs.scrollTop = msgs.scrollHeight;
+
+        try {
+          var messages = [{ role: "system", content: aiSystemPrompt }].concat(chatHistory.slice(0, -1));
+          messages.push({ role: "user", content: text });
+
+          var response = await fetch("https://text.pollinations.ai/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              messages: messages,
+              model: "openai",
+              seed: Math.floor(Math.random() * 9999)
+            })
+          });
+
+          var reply = await response.text();
+          reply = reply.trim();
+          chatHistory.push({ role: "assistant", content: reply });
+
+          var typing = document.getElementById(typingId);
+          if (typing) typing.remove();
+          appendAIBubble(msgs, reply);
+          msgs.scrollTop = msgs.scrollHeight;
+        } catch(err) {
+          var typing = document.getElementById(typingId);
+          if (typing) typing.remove();
+          var errDiv = document.createElement("div");
+          errDiv.className = "ai-error";
+          errDiv.innerHTML = "⚠️ Error: " + (err.message || "Could not reach AI. Please try again.");
+          msgs.appendChild(errDiv);
+        }
+
+        aiTyping = false;
+        if (sendBtn) sendBtn.disabled = false;
+        setTimeout(function(){ var t=document.getElementById("aiTextarea"); if(t) t.focus(); }, 50);
+      }
+
+      function appendAIBubble(container, text) {
+        var div = document.createElement("div");
+        div.className = "chat-msg ai";
+        div.innerHTML = '<div class="chat-avatar ai-av">AI</div><div class="chat-bubble">' + formatChatText(text) + '</div>';
+        container.appendChild(div);
+      }
+
+      function appendUserBubble(container, text) {
+        var div = document.createElement("div");
+        div.className = "chat-msg user";
+        div.innerHTML = '<div class="chat-avatar user-av">👤</div><div class="chat-bubble">' + escapeHtml(text).replace(/\n/g,"<br>") + '</div>';
+        container.appendChild(div);
+      }
+
+      function appendTimestamp(container) {
+        var d = document.createElement("div");
+        d.className = "chat-time";
+        d.textContent = new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+        container.appendChild(d);
+      }
+
+      function formatChatText(text) {
+        // Convert newlines to <br>, bold **text**, and bullet points
+        var escaped = escapeHtml(text);
+        escaped = escaped.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+        // Convert lines starting with - or • to list items
+        var lines = escaped.split("\n");
+        var result = [], inList = false;
+        for (var i = 0; i < lines.length; i++) {
+          var line = lines[i];
+          if (/^[-•]\s+/.test(line)) {
+            if (!inList) { result.push("<ul>"); inList = true; }
+            result.push("<li>" + line.replace(/^[-•]\s+/, "") + "</li>");
+          } else {
+            if (inList) { result.push("</ul>"); inList = false; }
+            if (line.trim() === "") { result.push("<br>"); }
+            else { result.push("<p>" + line + "</p>"); }
+          }
+        }
+        if (inList) result.push("</ul>");
+        return result.join("");
+      }
+
+      function escapeHtml(text) {
+        return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+      }
+
+      function resetChat() {
+        chatHistory = [];
+        aiTyping = false;
+        document.getElementById("aiResetBtn").style.display = "none";
+        document.getElementById("aiVerifyBtn").style.display = "flex";
+        document.getElementById("aiVerifyBtn").disabled = (lastAlpha === null);
+        var area = document.getElementById("aiChatArea");
+        area.innerHTML = '<div class="ai-messages" id="aiMessages"><div class="ai-idle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><p>Click <strong>Verify with AI</strong> to start a new analysis session.</p></div></div>';
+      }
+
+      /* ─── DOWNLOADS ─── */
+
+      function getResultsData() {
+        var alpha = document.getElementById("alphaValue").textContent;
+        var badge = document.getElementById("alphaBadge").textContent;
+        var k = document.getElementById("mK").textContent;
+        var n = document.getElementById("mN").textContent;
+        var sumVar = document.getElementById("mSumVar").textContent;
+        var totalVar = document.getElementById("mTotalVar").textContent;
+        return { alpha, badge, k, n, sumVar, totalVar };
+      }
+
+      function getMatrixData() {
+        if (nR === 0 || nI === 0) return null;
+        var rows = [];
+        var header = ["Respondent"];
+        for (var j = 1; j <= nI; j++) header.push("Item " + j);
+        header.push("Total");
+        rows.push(header);
+        for (var i = 1; i <= nR; i++) {
+          var row = ["R" + i];
+          var total = 0; var ok = true;
+          for (var j = 1; j <= nI; j++) {
+            var el = document.getElementById("c_" + i + "_" + j);
+            var v = el ? parseFloat(el.value) : NaN;
+            if (isNaN(v)) ok = false;
+            row.push(isNaN(v) ? "" : v);
+            total += isNaN(v) ? 0 : v;
+          }
+          row.push(ok ? total : "");
+          rows.push(row);
+        }
+        // Mean row
+        var meanRow = ["Mean"];
+        for (var j = 1; j <= nI; j++) {
+          var el = document.getElementById("cm_" + j);
+          meanRow.push(el ? el.textContent : "");
+        }
+        meanRow.push(document.getElementById("tm") ? document.getElementById("tm").textContent : "");
+        rows.push(meanRow);
+        // Variance row
+        var varRow = ["Variance s²"];
+        for (var j = 1; j <= nI; j++) {
+          var el = document.getElementById("cv_" + j);
+          varRow.push(el ? el.textContent : "");
+        }
+        varRow.push(document.getElementById("tv") ? document.getElementById("tv").textContent : "");
+        rows.push(varRow);
+        return rows;
+      }
+
+      function downloadExcel() {
+        if (nR === 0 || nI === 0) { alert("Please generate and fill the table first."); return; }
+        var wb = XLSX.utils.book_new();
+        var matrix = getMatrixData();
+        if (matrix) {
+          var ws1 = XLSX.utils.aoa_to_sheet(matrix);
+          XLSX.utils.book_append_sheet(wb, ws1, "Data Matrix");
+        }
+        var r = getResultsData();
+        var summaryData = [
+          ["Cronbach's Alpha Analysis — Summary"],[""],
+          ["Parameter","Value"],
+          ["Cronbach's Alpha (α)", r.alpha],
+          ["Reliability Level", r.badge],
+          ["Number of Items (k)", r.k],
+          ["Number of Respondents (N)", r.n],
+          ["Sum of Item Variances (Σs²ᵢ)", r.sumVar],
+          ["Total Score Variance (s²ₜ)", r.totalVar],
+          [""],["Formula: α = (k/(k-1)) × (1 - Σs²ᵢ/s²ₜ)"],
+          [""],["Reliability Scale:"],
+          ["α ≥ 0.90", "Excellent"],["0.80 ≤ α < 0.90","Good"],
+          ["0.70 ≤ α < 0.80","Acceptable"],["0.60 ≤ α < 0.70","Questionable"],
+          ["0.50 ≤ α < 0.60","Poor"],["α < 0.50","Unacceptable"]
+        ];
+        if (lastStats) {
+          summaryData.push([""]);
+          summaryData.push(["Item Variance Breakdown"]);
+          for (var i = 0; i < lastStats.ivars.length; i++) {
+            summaryData.push(["Item " + (i+1) + " Variance", lastStats.ivars[i].toFixed(4)]);
+          }
+          summaryData.push(["Sum of Item Variances", lastStats.siv.toFixed(4)]);
+        }
+        var ws2 = XLSX.utils.aoa_to_sheet(summaryData);
+        ws2["!cols"] = [{wch:35},{wch:20}];
+        XLSX.utils.book_append_sheet(wb, ws2, "Results Summary");
+        XLSX.writeFile(wb, "cronbach_alpha_results.xlsx");
+      }
+
+      function downloadWord() {
+        if (nR === 0 || nI === 0) { alert("Please generate and fill the table first."); return; }
+        var r = getResultsData();
+        var matrix = getMatrixData();
+        var tableHTML = "";
+        if (matrix) {
+          tableHTML = "<table border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse;width:100%;font-size:11pt;'>";
+          matrix.forEach(function(row, ri) {
+            tableHTML += "<tr>";
+            row.forEach(function(cell, ci) {
+              var tag = ri === 0 ? "th" : "td";
+              var bg = ri === 0 ? "background:#1d9e75;color:#fff;" : (ri >= matrix.length-2 ? "background:#f0efe9;" : (ci===0?"background:#f0efe9;":""));
+              tableHTML += "<" + tag + " style='" + bg + "padding:5px 8px;'>" + cell + "</" + tag + ">";
+            });
+            tableHTML += "</tr>";
+          });
+          tableHTML += "</table>";
+        }
+        var ivarTable = "";
+        if (lastStats) {
+          ivarTable = "<table border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse;width:50%;font-size:11pt;margin-top:10px;'>";
+          ivarTable += "<tr><th style='background:#1d9e75;color:#fff;padding:5px 8px;'>Item</th><th style='background:#1d9e75;color:#fff;padding:5px 8px;'>Variance s²</th></tr>";
+          for (var i = 0; i < lastStats.ivars.length; i++) {
+            ivarTable += "<tr><td style='padding:5px 8px;'>Item "+(i+1)+"</td><td style='padding:5px 8px;'>"+lastStats.ivars[i].toFixed(4)+"</td></tr>";
+          }
+          ivarTable += "<tr><td style='padding:5px 8px;font-weight:bold;background:#faeeda;'>Σ Item Variances</td><td style='padding:5px 8px;font-weight:bold;background:#faeeda;'>"+lastStats.siv.toFixed(4)+"</td></tr>";
+          ivarTable += "</table>";
+        }
+        var wordContent = `
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8"><title>Cronbach Alpha Results</title>
+<style>
+  body { font-family: Calibri, sans-serif; font-size: 11pt; margin: 2cm; color: #1a1916; }
+  h1 { font-size: 18pt; color: #0f6e56; border-bottom: 2px solid #0f6e56; padding-bottom: 6pt; }
+  h2 { font-size: 13pt; color: #0f6e56; margin-top: 18pt; margin-bottom: 8pt; }
+  .result-box { background: #e1f5ee; border: 1pt solid #9fe1cb; padding: 12pt 16pt; margin: 12pt 0; border-radius: 6pt; }
+  .alpha-val { font-size: 36pt; color: #0f6e56; font-weight: bold; }
+  .badge { display: inline-block; padding: 3pt 10pt; border-radius: 12pt; font-size: 11pt; font-weight: bold; background: #e1f5ee; color: #0f6e56; border: 1pt solid #9fe1cb; }
+  table { border-collapse: collapse; width: 100%; font-size: 10pt; }
+  th, td { border: 1pt solid #dddbd2; padding: 5pt 8pt; }
+  th { background: #1d9e75; color: white; }
+</style></head>
+<body>
+  <h1>Cronbach's Alpha Analysis Report</h1>
+  <p style="color:#8a8880;font-size:10pt;">Generated on ${new Date().toLocaleString()}</p>
+
+  <div class="result-box">
+    <p style="font-size:10pt;color:#0f6e56;text-transform:uppercase;letter-spacing:1px;margin-bottom:4pt;">CRONBACH'S ALPHA</p>
+    <div class="alpha-val">${r.alpha}</div><br>
+    <span class="badge">${r.badge}</span>
+  </div>
+
+  <h2>Summary Statistics</h2>
+  <table style="width:50%">
+    <tr><th>Parameter</th><th>Value</th></tr>
+    <tr><td>Number of Items (k)</td><td>${r.k}</td></tr>
+    <tr><td>Number of Respondents (N)</td><td>${r.n}</td></tr>
+    <tr><td>Sum of Item Variances (Σs²ᵢ)</td><td>${r.sumVar}</td></tr>
+    <tr><td>Total Score Variance (s²ₜ)</td><td>${r.totalVar}</td></tr>
+  </table>
+
+  <h2>Formula</h2>
+  <p style="font-family:Courier New;background:#f0efe9;padding:8pt 12pt;border-radius:4pt;">α = (k / (k − 1)) × (1 − Σs²ᵢ / s²ₜ)</p>
+
+  <h2>Reliability Interpretation Scale</h2>
+  <table style="width:60%">
+    <tr><th>Alpha Range</th><th>Interpretation</th></tr>
+    <tr${r.badge==='Excellent'?" style='background:#e1f5ee;font-weight:bold;'":''}><td>α ≥ 0.90</td><td>Excellent</td></tr>
+    <tr${r.badge==='Good'?" style='background:#eaf3de;font-weight:bold;'":''}><td>0.80 ≤ α &lt; 0.90</td><td>Good</td></tr>
+    <tr${r.badge==='Acceptable'?" style='background:#e6f1fb;font-weight:bold;'":''}><td>0.70 ≤ α &lt; 0.80</td><td>Acceptable</td></tr>
+    <tr${r.badge==='Questionable'?" style='background:#faeeda;font-weight:bold;'":''}><td>0.60 ≤ α &lt; 0.70</td><td>Questionable</td></tr>
+    <tr${r.badge==='Poor'?" style='background:#fbeaf0;font-weight:bold;'":''}><td>0.50 ≤ α &lt; 0.60</td><td>Poor</td></tr>
+    <tr${r.badge==='Unacceptable'?" style='background:#fcebeb;font-weight:bold;'":''}><td>α &lt; 0.50</td><td>Unacceptable</td></tr>
+  </table>
+
+  <h2>Item Variance Breakdown</h2>
+  ${ivarTable}
+
+  <h2>Data Entry Matrix</h2>
+  ${tableHTML}
+</body></html>`;
+        var blob = new Blob([wordContent], {type: "application/msword"});
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url; a.download = "cronbach_alpha_report.doc";
+        a.click(); URL.revokeObjectURL(url);
+      }
+
+      function downloadPDF() {
+        if (nR === 0 || nI === 0) { alert("Please generate and fill the table first."); return; }
+        var r = getResultsData();
+        var { jsPDF } = window.jspdf;
+        var doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+        var margin = 18, y = 20, pageW = 210, cW = pageW - 2*margin;
+
+        // Title
+        doc.setFillColor(14, 110, 86);
+        doc.rect(0, 0, 210, 38, "F");
+        doc.setTextColor(255,255,255);
+        doc.setFont("helvetica","bold"); doc.setFontSize(18);
+        doc.text("Cronbach's Alpha Analysis Report", margin, 18);
+        doc.setFont("helvetica","normal"); doc.setFontSize(9);
+        doc.text("Internal Consistency & Reliability Analysis", margin, 26);
+        doc.text("Generated: " + new Date().toLocaleString(), margin, 32);
+        y = 48;
+
+        // Alpha result box
+        doc.setFillColor(225,245,238); doc.setDrawColor(159,225,203);
+        doc.roundedRect(margin, y, cW, 26, 3, 3, "FD");
+        doc.setTextColor(15,110,86); doc.setFont("helvetica","bold"); doc.setFontSize(28);
+        doc.text("α = " + r.alpha, margin+8, y+17);
+        doc.setFontSize(11);
+        doc.text(r.badge, margin+8+doc.getTextWidth("α = "+r.alpha)+6, y+17);
+        y += 34;
+
+        // Summary table
+        doc.setTextColor(30,30,30); doc.setFont("helvetica","bold"); doc.setFontSize(12);
+        doc.text("Summary Statistics", margin, y); y += 6;
+        var rows = [["Items (k)",r.k],["Respondents (N)",r.n],["Σ Item Variances",r.sumVar],["Total Variance",r.totalVar]];
+        rows.forEach(function(row, i) {
+          doc.setFillColor(i%2===0?248:255,i%2===0?248:255,i%2===0?245:255);
+          doc.rect(margin, y, cW, 7, "F");
+          doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(74,72,67);
+          doc.text(row[0], margin+3, y+5);
+          doc.setFont("helvetica","normal"); doc.setTextColor(30,30,30);
+          doc.text(String(row[1]), margin+cW-3, y+5, {align:"right"});
+          y += 7;
+        }); y += 6;
+
+        // Item variances
+        if (lastStats) {
+          doc.setFont("helvetica","bold"); doc.setFontSize(12); doc.setTextColor(30,30,30);
+          doc.text("Item Variance Breakdown", margin, y); y += 6;
+          lastStats.ivars.forEach(function(v, i) {
+            doc.setFillColor(i%2===0?248:255,i%2===0?248:255,i%2===0?245:255);
+            doc.rect(margin, y, cW/2, 6, "F");
+            doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(74,72,67);
+            doc.text("Item "+(i+1)+" s²", margin+3, y+4);
+            doc.setTextColor(133,79,11); doc.text(v.toFixed(4), margin+cW/2-3, y+4, {align:"right"});
+            y += 6;
+            if (y > 260) { doc.addPage(); y = 18; }
+          });
+          doc.setFillColor(250,238,218); doc.rect(margin, y, cW/2, 7, "F");
+          doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(133,79,11);
+          doc.text("Σ Item Variances", margin+3, y+5);
+          doc.text(lastStats.siv.toFixed(4), margin+cW/2-3, y+5, {align:"right"});
+          y += 12;
+        }
+
+        // Formula
+        doc.setFont("helvetica","bold"); doc.setFontSize(12); doc.setTextColor(30,30,30);
+        doc.text("Formula", margin, y); y += 6;
+        doc.setFillColor(240,239,233); doc.rect(margin, y, cW, 9, "F");
+        doc.setFont("courier","normal"); doc.setFontSize(10); doc.setTextColor(15,110,86);
+        doc.text("alpha = (k / (k-1)) x (1 - Sum_si2 / s2_total)", margin+4, y+6);
+        y += 14;
+
+        // Reliability scale
+        if (y > 230) { doc.addPage(); y = 18; }
+        doc.setFont("helvetica","bold"); doc.setFontSize(12); doc.setTextColor(30,30,30);
+        doc.text("Reliability Interpretation Scale", margin, y); y += 6;
+        var scaleRows = [["α ≥ 0.90","Excellent","ex"],["0.80 ≤ α < 0.90","Good","gd"],["0.70 ≤ α < 0.80","Acceptable","ac"],["0.60 ≤ α < 0.70","Questionable","qu"],["0.50 ≤ α < 0.60","Poor","po"],["α < 0.50","Unacceptable","un"]];
+        var colors = {ex:[225,245,238],gd:[234,243,222],ac:[230,241,251],qu:[250,238,218],po:[251,234,240],un:[252,235,235]};
+        scaleRows.forEach(function(row) {
+          var isActive = r.badge === row[1];
+          var c = colors[row[2]] || [248,248,245];
+          doc.setFillColor(isActive?c[0]:248, isActive?c[1]:248, isActive?c[2]:245);
+          doc.rect(margin, y, cW, 7, "F");
+          if (isActive) { doc.setDrawColor(15,110,86); doc.rect(margin, y, 2, 7, "F"); }
+          doc.setFont("courier","normal"); doc.setFontSize(9); doc.setTextColor(isActive?15:74,isActive?110:72,isActive?86:67);
+          doc.text(row[0], margin+5, y+5);
+          doc.setFont("helvetica", isActive?"bold":"normal");
+          doc.text(row[1], margin+cW-3, y+5, {align:"right"});
+          y += 7;
+        });
+
+        doc.save("cronbach_alpha_report.pdf");
+      }
+
+      function downloadPNG() {
+        if (nR === 0 || nI === 0) { alert("Please generate and fill the table first."); return; }
+        var el = document.getElementById("resultsGrid");
+        html2canvas(el, {
+          backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--surface").trim() || "#ffffff",
+          scale: 2,
+          useCORS: true,
+          logging: false
+        }).then(function(canvas) {
+          var link = document.createElement("a");
+          link.download = "cronbach_alpha_results.png";
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+        });
+      }
+
+      /* ─── THEME ─── */
+      function toggleTheme() {
+        var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        document.documentElement.setAttribute("data-theme", isDark ? "light" : "dark");
+        document.getElementById("themeIcon").textContent = isDark ? "☀" : "☾";
+        document.getElementById("themeLabel").textContent = isDark ? "Light mode" : "Dark mode";
+        try { localStorage.setItem("ca-theme", isDark ? "light" : "dark"); } catch(e){}
+      }
+
+      (function() {
         var saved, dark;
-        try {
-          saved = localStorage.getItem("ca-theme");
-        } catch (e) {}
-        try {
-          dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        } catch (e) {}
+        try { saved = localStorage.getItem("ca-theme"); } catch(e){}
+        try { dark = window.matchMedia("(prefers-color-scheme: dark)").matches; } catch(e){}
         var t = saved || (dark ? "dark" : "light");
         document.documentElement.setAttribute("data-theme", t);
         if (t === "dark") {
