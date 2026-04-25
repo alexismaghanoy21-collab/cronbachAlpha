@@ -1,0 +1,1330 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cronbach's Alpha Calculator</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #f7f6f2;
+        --surface: #ffffff;
+        --surface2: #f0efe9;
+        --border: #dddbd2;
+        --border2: #c8c6bc;
+        --text: #1a1916;
+        --text2: #4a4843;
+        --text3: #8a8880;
+        --teal: #0f6e56;
+        --teal-light: #e1f5ee;
+        --teal-mid: #1d9e75;
+        --teal-dk: #085041;
+        --amber: #854f0b;
+        --amber-light: #faeeda;
+        --purple: #534ab7;
+        --mono: "JetBrains Mono", monospace;
+        --serif: "Source Serif 4", serif;
+        --sans: "DM Sans", sans-serif;
+        --r: 10px;
+        --r-sm: 6px;
+      }
+
+      [data-theme="dark"] {
+        --bg: #111110;
+        --surface: #1a1917;
+        --surface2: #222220;
+        --border: #2e2d2a;
+        --border2: #3e3d39;
+        --text: #f0ede6;
+        --text2: #a8a49c;
+        --text3: #5e5c57;
+        --teal: #5dcaa5;
+        --teal-light: #04342c;
+        --teal-mid: #1d9e75;
+        --teal-dk: #9fe1cb;
+        --amber: #fac775;
+        --amber-light: #412402;
+        --purple: #afa9ec;
+      }
+
+      html,
+      body {
+        min-height: 100%;
+      }
+      body {
+        font-family: var(--sans);
+        background: var(--bg);
+        color: var(--text);
+        font-size: 14px;
+        line-height: 1.6;
+        transition:
+          background 0.2s,
+          color 0.2s;
+      }
+
+      /* HEADER */
+      .hdr {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        padding: 13px 22px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .hdr-left {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        flex: 1;
+        min-width: 0;
+      }
+      .hdr h1 {
+        font-family: var(--serif);
+        font-size: 19px;
+        font-weight: 600;
+        letter-spacing: -0.3px;
+        color: var(--text);
+        white-space: nowrap;
+      }
+      .hdr .sub {
+        font-size: 12px;
+        color: var(--text3);
+        font-weight: 300;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .toggle-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 13px;
+        border: 1px solid var(--border2);
+        border-radius: 20px;
+        background: var(--surface2);
+        cursor: pointer;
+        font-family: var(--sans);
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--text2);
+        transition:
+          background 0.15s,
+          color 0.15s;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .toggle-btn:hover {
+        background: var(--border);
+        color: var(--text);
+      }
+
+      /* PAGE */
+      .wrap {
+        padding: 18px 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      /* CONFIG BAR */
+      .cfg {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        padding: 14px 18px;
+        display: flex;
+        align-items: flex-end;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+      .cfg-title {
+        font-family: var(--serif);
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        white-space: nowrap;
+        align-self: center;
+        margin-right: 4px;
+      }
+      .cfg-title::before {
+        content: "";
+        display: inline-block;
+        width: 3px;
+        height: 13px;
+        background: var(--teal-mid);
+        border-radius: 2px;
+      }
+      .fld {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 130px;
+        flex: 1;
+      }
+      .fld label {
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--text2);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .fld input[type="number"] {
+        width: 100%;
+        padding: 8px 11px;
+        border: 1px solid var(--border);
+        border-radius: var(--r-sm);
+        font-family: var(--mono);
+        font-size: 14px;
+        color: var(--text);
+        background: var(--bg);
+        outline: none;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+      .fld input[type="number"]:focus {
+        border-color: var(--teal-mid);
+        background: var(--surface);
+      }
+      [data-theme="dark"] .fld input[type="number"] {
+        background: var(--surface2);
+      }
+      [data-theme="dark"] .fld input[type="number"]:focus {
+        background: var(--surface);
+      }
+
+      .gen-btn {
+        padding: 9px 20px;
+        background: var(--teal);
+        color: #fff;
+        border: none;
+        border-radius: var(--r-sm);
+        font-family: var(--sans);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        white-space: nowrap;
+        flex-shrink: 0;
+        align-self: flex-end;
+        transition:
+          background 0.15s,
+          transform 0.1s;
+      }
+      .gen-btn:hover {
+        background: var(--teal-dk);
+      }
+      .gen-btn:active {
+        transform: scale(0.98);
+      }
+
+      /* TABLE CARD */
+      .tbl-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        overflow: hidden;
+      }
+      .tbl-hdr {
+        padding: 11px 18px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .tbl-hdr h2 {
+        font-family: var(--serif);
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .prog-row {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        flex: 1;
+        min-width: 140px;
+        max-width: 300px;
+      }
+      .prog-wrap {
+        flex: 1;
+        height: 5px;
+        background: var(--border);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .prog-bar {
+        height: 100%;
+        background: var(--teal-mid);
+        border-radius: 3px;
+        transition: width 0.3s;
+      }
+      .prog-lbl {
+        font-size: 11px;
+        color: var(--text3);
+        white-space: nowrap;
+      }
+
+      .tbl-scroll {
+        overflow: auto;
+        width: 100%;
+        max-height: 55vh;
+      }
+
+      table {
+        border-collapse: collapse;
+        font-family: var(--mono);
+        font-size: 12px;
+        width: 100%;
+      }
+
+      thead th {
+        position: sticky;
+        top: 0;
+        background: var(--surface2);
+        padding: 7px 8px;
+        text-align: center;
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--text2);
+        border-bottom: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+        white-space: nowrap;
+        z-index: 2;
+      }
+      thead th:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 3;
+        min-width: 54px;
+      }
+      thead th.tc {
+        background: var(--teal-light);
+        color: var(--teal);
+        border-right: none;
+      }
+
+      tbody tr:hover td {
+        background: var(--surface2);
+      }
+      tbody td {
+        padding: 1px 3px;
+        border-bottom: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+        text-align: center;
+        vertical-align: middle;
+      }
+      tbody td:first-child {
+        position: sticky;
+        left: 0;
+        background: var(--surface2);
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--text2);
+        padding: 3px 8px;
+        z-index: 1;
+        min-width: 54px;
+      }
+      tbody td.tc {
+        background: var(--teal-light);
+        color: var(--teal);
+        font-weight: 500;
+        border-right: none;
+      }
+
+      tfoot td {
+        background: var(--surface2);
+        padding: 5px 8px;
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--text2);
+        border-top: 2px solid var(--border2);
+        border-right: 1px solid var(--border);
+        text-align: center;
+        position: sticky;
+        bottom: 0;
+        z-index: 1;
+      }
+      tfoot td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+      }
+      tfoot td.vc {
+        background: var(--amber-light);
+        color: var(--amber);
+      }
+      tfoot td.tc {
+        background: var(--teal-light);
+        color: var(--teal);
+        border-right: none;
+      }
+
+      input.ci {
+        width: 60px;
+        padding: 4px 5px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        font-family: var(--mono);
+        font-size: 12px;
+        text-align: center;
+        background: transparent;
+        color: var(--text);
+        outline: none;
+        transition:
+          border-color 0.1s,
+          background 0.1s;
+      }
+      input.ci:focus {
+        border-color: var(--teal-mid);
+        background: var(--surface);
+      }
+      input.ci:hover {
+        border-color: var(--border2);
+        background: var(--surface);
+      }
+
+      .empty-state {
+        padding: 44px 24px;
+        text-align: center;
+        color: var(--text3);
+        font-size: 13px;
+        line-height: 1.9;
+      }
+
+      /* BOTTOM GRID */
+      .bot {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+      }
+
+      /* RESULT HERO */
+      .hero {
+        background: var(--teal-light);
+        border: 1px solid #9fe1cb;
+        border-radius: var(--r);
+        padding: 18px 20px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        grid-column: 1 / -1;
+      }
+      [data-theme="dark"] .hero {
+        border-color: #085041;
+      }
+      .alpha-big {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 90px;
+      }
+      .alpha-big .al {
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--teal);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 2px;
+      }
+      .alpha-big .av {
+        font-family: var(--serif);
+        font-size: 46px;
+        font-weight: 600;
+        color: var(--teal);
+        line-height: 1;
+        letter-spacing: -2px;
+        font-style: italic;
+      }
+      .abadge {
+        display: inline-block;
+        padding: 4px 13px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        margin-top: 7px;
+      }
+      .b-ex {
+        background: #e1f5ee;
+        color: #0f6e56;
+      }
+      .b-gd {
+        background: #eaf3de;
+        color: #3b6d11;
+      }
+      .b-ac {
+        background: #e6f1fb;
+        color: #185fa5;
+      }
+      .b-qu {
+        background: #faeeda;
+        color: #854f0b;
+      }
+      .b-po {
+        background: #fbeaf0;
+        color: #993556;
+      }
+      .b-un {
+        background: #fcebeb;
+        color: #a32d2d;
+      }
+      .b-na {
+        background: var(--surface2);
+        color: var(--text3);
+      }
+      [data-theme="dark"] .b-ex {
+        background: #04342c;
+        color: #5dcaa5;
+      }
+      [data-theme="dark"] .b-gd {
+        background: #173404;
+        color: #97c459;
+      }
+      [data-theme="dark"] .b-ac {
+        background: #042c53;
+        color: #85b7eb;
+      }
+      [data-theme="dark"] .b-qu {
+        background: #412402;
+        color: #fac775;
+      }
+      [data-theme="dark"] .b-po {
+        background: #4b1528;
+        color: #ed93b1;
+      }
+      [data-theme="dark"] .b-un {
+        background: #501313;
+        color: #f09595;
+      }
+
+      .mstrip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        flex: 1;
+      }
+      .mpill {
+        background: var(--surface);
+        border-radius: var(--r-sm);
+        padding: 9px 13px;
+        min-width: 90px;
+        flex: 1;
+      }
+      .mpill .mpl {
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--text3);
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      .mpill .mpv {
+        font-family: var(--mono);
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--text);
+        margin-top: 2px;
+      }
+
+      /* SECTION CARDS */
+      .sc {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        overflow: hidden;
+      }
+      .sc-hd {
+        padding: 9px 15px;
+        background: var(--surface2);
+        border-bottom: 1px solid var(--border);
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text2);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+      }
+      .sc-bd {
+        padding: 15px;
+      }
+
+      .fbox {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--r-sm);
+        padding: 11px 14px;
+        font-family: var(--mono);
+        font-size: 14px;
+        text-align: center;
+        color: var(--teal);
+        font-weight: 500;
+        margin-bottom: 11px;
+      }
+      .fleg {
+        font-size: 12px;
+        color: var(--text2);
+        line-height: 2;
+      }
+      .fleg code {
+        font-family: var(--mono);
+        background: var(--surface2);
+        padding: 1px 5px;
+        border-radius: 3px;
+        color: var(--purple);
+        font-size: 11px;
+      }
+
+      .slist {
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+      }
+      .si {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+      }
+      .sn {
+        width: 21px;
+        height: 21px;
+        border-radius: 50%;
+        background: var(--teal-light);
+        color: var(--teal);
+        font-size: 11px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+      .st {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+        margin-bottom: 2px;
+      }
+      .sd {
+        font-size: 12px;
+        color: var(--text2);
+        line-height: 1.6;
+      }
+      .sv {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--teal);
+        background: var(--teal-light);
+        display: inline-block;
+        padding: 2px 7px;
+        border-radius: 4px;
+        margin-top: 4px;
+      }
+
+      .ivlist {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .ive {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 5px 9px;
+        background: var(--bg);
+        border-radius: 4px;
+        font-size: 12px;
+      }
+      .ivl {
+        color: var(--text2);
+      }
+      .ivv {
+        font-family: var(--mono);
+        font-weight: 500;
+        color: var(--amber);
+      }
+      .ivsum {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 7px 9px;
+        background: var(--amber-light);
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--amber);
+        margin-top: 6px;
+      }
+      .ivsum .ivsv {
+        font-family: var(--mono);
+        font-size: 13px;
+      }
+
+      .itbl {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      .itbl tr {
+        border-bottom: 1px solid var(--border);
+      }
+      .itbl tr:last-child {
+        border-bottom: none;
+      }
+      .itbl td {
+        padding: 7px 10px;
+      }
+      .itbl td:first-child {
+        font-family: var(--mono);
+        font-weight: 500;
+        width: 120px;
+      }
+      .itbl td:last-child {
+        color: var(--text2);
+      }
+      .cr td {
+        background: var(--teal-light) !important;
+        color: var(--teal) !important;
+        font-weight: 600;
+      }
+      [data-theme="dark"] .cr td {
+        background: #04342c !important;
+        color: #5dcaa5 !important;
+      }
+
+      .pend {
+        text-align: center;
+        padding: 18px;
+        color: var(--text3);
+        font-size: 13px;
+        font-style: italic;
+      }
+
+      @media (max-width: 600px) {
+        .wrap {
+          padding: 10px 12px;
+          gap: 12px;
+        }
+        .hdr {
+          padding: 11px 14px;
+        }
+        .hdr h1 {
+          font-size: 16px;
+        }
+        .hdr .sub {
+          display: none;
+        }
+        .cfg {
+          padding: 12px;
+          gap: 10px;
+        }
+        .cfg-title {
+          display: none;
+        }
+        .fld {
+          min-width: 110px;
+        }
+        .alpha-big .av {
+          font-size: 38px;
+        }
+        .tbl-scroll {
+          max-height: 42vh;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hdr">
+      <div class="hdr-left">
+        <h1>Cronbach's Alpha Calculator</h1>
+        <span class="sub">Internal Consistency &amp; Reliability Analysis</span>
+      </div>
+      <button class="toggle-btn" onclick="toggleTheme()">
+        <span id="themeIcon">☀</span><span id="themeLabel">Light mode</span>
+      </button>
+    </header>
+
+    <div class="wrap">
+      <div class="cfg">
+        <span class="cfg-title">Setup</span>
+        <div class="fld">
+          <label>Respondents (N)</label>
+          <input
+            type="number"
+            id="numRespondents"
+            min="2"
+            placeholder="e.g. 30"
+          />
+        </div>
+        <div class="fld">
+          <label>Items (k)</label>
+          <input type="number" id="numItems" min="2" placeholder="e.g. 10" />
+        </div>
+        <button class="gen-btn" onclick="generateTable()">
+          Generate Table
+        </button>
+      </div>
+
+      <div class="tbl-card">
+        <div class="tbl-hdr">
+          <h2>Data Entry Matrix</h2>
+          <div class="prog-row" id="progRow" style="display: none">
+            <div class="prog-wrap">
+              <div class="prog-bar" id="progBar" style="width: 0%"></div>
+            </div>
+            <span class="prog-lbl" id="progLbl">0 / 0</span>
+          </div>
+        </div>
+        <div id="tblContainer">
+          <div class="empty-state">
+            Enter the number of respondents and items above, then click
+            <strong>Generate Table</strong>.
+          </div>
+        </div>
+      </div>
+
+      <div class="bot">
+        <div class="hero">
+          <div class="alpha-big">
+            <div class="al">Cronbach's α</div>
+            <div class="av" id="alphaValue">—</div>
+            <span class="abadge b-na" id="alphaBadge">Awaiting data</span>
+          </div>
+          <div class="mstrip">
+            <div class="mpill">
+              <div class="mpl">Items (k)</div>
+              <div class="mpv" id="mK">—</div>
+            </div>
+            <div class="mpill">
+              <div class="mpl">Respondents (N)</div>
+              <div class="mpv" id="mN">—</div>
+            </div>
+            <div class="mpill">
+              <div class="mpl">Σ Item Variances</div>
+              <div class="mpv" id="mSumVar">—</div>
+            </div>
+            <div class="mpill">
+              <div class="mpl">Total Variance</div>
+              <div class="mpv" id="mTotalVar">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sc">
+          <div class="sc-hd">Formula &amp; Definition</div>
+          <div class="sc-bd">
+            <div class="fbox">α = (k / (k − 1)) × (1 − Σσ²ᵢ / σ²ₜ)</div>
+            <div class="fleg">
+              <code>k</code> — Number of items in the scale<br />
+              <code>σ²ᵢ</code> — Population variance of each item<br />
+              <code>Σσ²ᵢ</code> — Sum of all item variances<br />
+              <code>σ²ₜ</code> — Variance of the total composite scores<br />
+              <code>α</code> — Cronbach's Alpha (0 to 1)
+            </div>
+          </div>
+        </div>
+
+        <div class="sc">
+          <div class="sc-hd">Reliability Interpretation</div>
+          <div class="sc-bd">
+            <table class="itbl">
+              <tbody>
+                <tr id="ir-ex">
+                  <td>α ≥ 0.90</td>
+                  <td>Excellent</td>
+                </tr>
+                <tr id="ir-gd">
+                  <td>0.80 ≤ α &lt; 0.90</td>
+                  <td>Good</td>
+                </tr>
+                <tr id="ir-ac">
+                  <td>0.70 ≤ α &lt; 0.80</td>
+                  <td>Acceptable</td>
+                </tr>
+                <tr id="ir-qu">
+                  <td>0.60 ≤ α &lt; 0.70</td>
+                  <td>Questionable</td>
+                </tr>
+                <tr id="ir-po">
+                  <td>0.50 ≤ α &lt; 0.60</td>
+                  <td>Poor</td>
+                </tr>
+                <tr id="ir-un">
+                  <td>α &lt; 0.50</td>
+                  <td>Unacceptable</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sc">
+          <div class="sc-hd">Step-by-Step Solution</div>
+          <div class="sc-bd">
+            <div class="slist" id="stepList">
+              <div class="pend">
+                Fill in the table to see the full solution.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sc">
+          <div class="sc-hd">Item Variances Breakdown</div>
+          <div class="sc-bd" id="ivBreakdown">
+            <div class="pend">No data yet.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      // Disable Right-click
+      document.addEventListener("contextmenu", (e) => e.preventDefault());
+
+      // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+      document.onkeydown = function (e) {
+        if (
+          e.keyCode === 123 || // F12
+          (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || // Ctrl+Shift+I/J
+          (e.ctrlKey && e.keyCode === 85) // Ctrl+U (View Source)
+        ) {
+          return false;
+        }
+      };
+    </script>
+    <script>
+      var nR = 0,
+        nI = 0;
+
+      function generateTable() {
+        nR = parseInt(document.getElementById("numRespondents").value) || 0;
+        nI = parseInt(document.getElementById("numItems").value) || 0;
+        if (nR < 2 || nI < 2) {
+          alert("Please enter at least 2 respondents and 2 items.");
+          return;
+        }
+
+        document.getElementById("mK").textContent = nI;
+        document.getElementById("mN").textContent = nR;
+
+        var h = '<div class="tbl-scroll"><table><thead><tr><th>Resp.</th>';
+        for (var j = 1; j <= nI; j++) h += "<th>Item " + j + "</th>";
+        h += '<th class="tc">Total</th></tr></thead><tbody>';
+        for (var i = 1; i <= nR; i++) {
+          h += "<tr><td>R" + i + "</td>";
+          for (var j = 1; j <= nI; j++) {
+            h +=
+              '<td><input class="ci" type="number" id="c_' +
+              i +
+              "_" +
+              j +
+              '" step="any"' +
+              ' oninput="onInput()" onkeydown="nav(event,' +
+              i +
+              "," +
+              j +
+              ')"' +
+              ' autocomplete="off"></td>';
+          }
+          h += '<td class="tc" id="rt_' + i + '">—</td></tr>';
+        }
+        h += "</tbody><tfoot>" + "<tr><td>Mean</td>";
+        for (var j = 1; j <= nI; j++) h += '<td id="cm_' + j + '">—</td>';
+        h += '<td class="tc" id="tm">—</td></tr>' + "<tr><td>Var s²</td>";
+        for (var j = 1; j <= nI; j++)
+          h += '<td class="vc" id="cv_' + j + '">—</td>';
+        h += '<td class="tc" id="tv">—</td></tr>' + "</tfoot></table></div>";
+
+        document.getElementById("tblContainer").innerHTML = h;
+        document.getElementById("progRow").style.display = "flex";
+        updateProg();
+        resetResults();
+      }
+
+      function nav(e, i, j) {
+        var ni = i,
+          nj = j;
+        if (e.key === "ArrowRight") nj = Math.min(nI, j + 1);
+        else if (e.key === "ArrowLeft") nj = Math.max(1, j - 1);
+        else if (e.key === "ArrowDown") ni = Math.min(nR, i + 1);
+        else if (e.key === "ArrowUp") ni = Math.max(1, i - 1);
+        else return;
+        e.preventDefault();
+        var el = document.getElementById("c_" + ni + "_" + nj);
+        if (el) el.focus();
+      }
+
+      function getVals() {
+        var d = [];
+        for (var i = 1; i <= nR; i++) {
+          var row = [];
+          for (var j = 1; j <= nI; j++) {
+            var el = document.getElementById("c_" + i + "_" + j);
+            var v = el ? parseFloat(el.value) : NaN;
+            row.push(isNaN(v) ? null : v);
+          }
+          d.push(row);
+        }
+        return d;
+      }
+
+      function updateProg() {
+        var d = getVals(),
+          filled = 0,
+          total = nR * nI;
+        for (var i = 0; i < d.length; i++)
+          for (var j = 0; j < d[i].length; j++) if (d[i][j] !== null) filled++;
+        var pct = total > 0 ? (filled / total) * 100 : 0;
+        document.getElementById("progBar").style.width = pct.toFixed(1) + "%";
+        document.getElementById("progLbl").textContent = filled + " / " + total;
+      }
+
+      function avg(arr) {
+        return (
+          arr.reduce(function (a, b) {
+            return a + b;
+          }, 0) / arr.length
+        );
+      }
+
+      // ENHANCED: Calculates Sample Variance to mimic Excel's VAR.S
+      function vari(arr) {
+        if (arr.length < 2) return 0;
+        var m = avg(arr);
+        return (
+          arr.reduce(function (s, x) {
+            return s + Math.pow(x - m, 2);
+          }, 0) /
+          (arr.length - 1) // Changed from arr.length to N-1
+        );
+      }
+
+      function onInput() {
+        updateProg();
+        var d = getVals();
+        rowTotals(d);
+        footerStats(d);
+        var comp = d.filter(function (r) {
+          return r.every(function (v) {
+            return v !== null;
+          });
+        });
+        if (comp.length >= 2) {
+          var allFull = d.every(function (r) {
+            return r.every(function (v) {
+              return v !== null;
+            });
+          });
+          calcAlpha(comp, !allFull);
+        } else {
+          resetResults();
+        }
+      }
+
+      function rowTotals(d) {
+        for (var i = 0; i < nR; i++) {
+          var el = document.getElementById("rt_" + (i + 1));
+          if (!el) continue;
+          var full = d[i].every(function (v) {
+            return v !== null;
+          });
+          el.textContent = full
+            ? d[i]
+                .reduce(function (a, b) {
+                  return a + b;
+                }, 0)
+                .toFixed(2)
+            : "—";
+        }
+      }
+
+      function footerStats(d) {
+        for (var j = 0; j < nI; j++) {
+          var col = d
+            .map(function (r) {
+              return r[j];
+            })
+            .filter(function (v) {
+              return v !== null;
+            });
+          var me = document.getElementById("cm_" + (j + 1));
+          var ve = document.getElementById("cv_" + (j + 1));
+          if (col.length > 1) {
+            if (me) me.textContent = avg(col).toFixed(3);
+            if (ve) ve.textContent = vari(col).toFixed(4);
+          } else {
+            if (me) me.textContent = "—";
+            if (ve) ve.textContent = "—";
+          }
+        }
+        var ct = d
+          .filter(function (r) {
+            return r.every(function (v) {
+              return v !== null;
+            });
+          })
+          .map(function (r) {
+            return r.reduce(function (a, b) {
+              return a + b;
+            }, 0);
+          });
+        var tme = document.getElementById("tm"),
+          tve = document.getElementById("tv");
+        if (ct.length > 1) {
+          if (tme) tme.textContent = avg(ct).toFixed(3);
+          if (tve) tve.textContent = vari(ct).toFixed(4);
+        } else {
+          if (tme) tme.textContent = "—";
+          if (tve) tve.textContent = "—";
+        }
+      }
+
+      function calcAlpha(d, partial) {
+        var k = nI,
+          N = d.length;
+        var ivars = [];
+        for (var j = 0; j < k; j++) {
+          var col = d
+            .map(function (r) {
+              return r[j];
+            })
+            .filter(function (v) {
+              return v !== null;
+            });
+          ivars.push(col.length >= 2 ? vari(col) : 0);
+        }
+        var tots = d.map(function (r) {
+          return r.reduce(function (a, b) {
+            return a + b;
+          }, 0);
+        });
+        var tvar = vari(tots);
+        var siv = ivars.reduce(function (a, b) {
+          return a + b;
+        }, 0);
+
+        document.getElementById("mSumVar").textContent = siv.toFixed(4);
+        document.getElementById("mTotalVar").textContent = tvar.toFixed(4);
+
+        if (tvar <= 0) {
+          resetResults();
+          return;
+        }
+
+        var alpha = (k / (k - 1)) * (1 - siv / tvar);
+        document.getElementById("alphaValue").textContent = alpha.toFixed(4);
+        setBadge(alpha, partial);
+        setSteps(k, N, ivars, siv, tvar, alpha, tots, partial);
+        setIVBreak(ivars, siv);
+        setInterp(alpha);
+      }
+
+      function setBadge(a, partial) {
+        var cls, lbl;
+        if (a >= 0.9) {
+          cls = "b-ex";
+          lbl = "Excellent";
+        } else if (a >= 0.8) {
+          cls = "b-gd";
+          lbl = "Good";
+        } else if (a >= 0.7) {
+          cls = "b-ac";
+          lbl = "Acceptable";
+        } else if (a >= 0.6) {
+          cls = "b-qu";
+          lbl = "Questionable";
+        } else if (a >= 0.5) {
+          cls = "b-po";
+          lbl = "Poor";
+        } else {
+          cls = "b-un";
+          lbl = "Unacceptable";
+        }
+        var el = document.getElementById("alphaBadge");
+        el.className = "abadge " + cls;
+        el.textContent = lbl + (partial ? " (partial)" : "");
+      }
+
+      function setSteps(k, N, ivars, siv, tvar, alpha, tots, partial) {
+        var vlist = ivars
+          .map(function (v, i) {
+            return "s²<sub>" + (i + 1) + "</sub> = " + v.toFixed(4);
+          })
+          .join(", ");
+        var rm = avg(tots);
+        document.getElementById("stepList").innerHTML =
+          step(
+            1,
+            "Identify Parameters",
+            "Number of items <b>k = " +
+              k +
+              "</b>, respondents <b>N = " +
+              N +
+              "</b>" +
+              (partial ? " (complete rows only)" : "") +
+              ".",
+            "",
+          ) +
+          step(
+            2,
+            "Compute Each Item's Variance (s²ᵢ)",
+            "Sample variance formula (Matches Excel VAR.S): s²ᵢ = Σ(xᵢ − x̄)² / (N−1)<br><br>" +
+              vlist,
+            "",
+          ) +
+          step(
+            3,
+            "Sum All Item Variances (Σs²ᵢ)",
+            "Add all item variances from Step 2.",
+            "Σs²ᵢ = " + siv.toFixed(4),
+          ) +
+          step(
+            4,
+            "Compute Total Score Variance (s²ₜ)",
+            "Row sums = total scores T; compute variance of T.<br>Mean total = " +
+              rm.toFixed(3) +
+              ".",
+            "s²ₜ = " + tvar.toFixed(4),
+          ) +
+          step(
+            5,
+            "Apply Cronbach's Alpha Formula",
+            "α = (k/(k−1)) × (1−Σs²ᵢ/s²ₜ)<br>" +
+              "α = (" +
+              k +
+              "/" +
+              (k - 1) +
+              ") × (1−" +
+              siv.toFixed(4) +
+              "/" +
+              tvar.toFixed(4) +
+              ")<br>" +
+              "α = " +
+              (k / (k - 1)).toFixed(4) +
+              " × " +
+              (1 - siv / tvar).toFixed(4),
+            "α = " + alpha.toFixed(4),
+          );
+      }
+
+      function step(n, title, desc, val) {
+        return (
+          '<div class="si"><div class="sn">' +
+          n +
+          '</div><div class="step-content">' +
+          '<div class="st">' +
+          title +
+          "</div>" +
+          '<div class="sd">' +
+          desc +
+          "</div>" +
+          (val ? '<div class="sv">' + val + "</div>" : "") +
+          "</div></div>"
+        );
+      }
+
+      function setIVBreak(ivars, siv) {
+        var h = '<div class="ivlist">';
+        for (var i = 0; i < ivars.length; i++) {
+          h +=
+            '<div class="ive"><span class="ivl">Item ' +
+            (i + 1) +
+            " s²</span>" +
+            '<span class="ivv">' +
+            ivars[i].toFixed(4) +
+            "</span></div>";
+        }
+        h +=
+          '</div><div class="ivsum"><span>Σ Item Variances</span>' +
+          '<span class="ivsv">' +
+          siv.toFixed(4) +
+          "</span></div>";
+        document.getElementById("ivBreakdown").innerHTML = h;
+      }
+
+      function setInterp(a) {
+        var ids = ["ex", "gd", "ac", "qu", "po", "un"];
+        for (var i = 0; i < ids.length; i++) {
+          var el = document.getElementById("ir-" + ids[i]);
+          if (el) el.classList.remove("cr");
+        }
+        var w;
+        if (a >= 0.9) w = "ex";
+        else if (a >= 0.8) w = "gd";
+        else if (a >= 0.7) w = "ac";
+        else if (a >= 0.6) w = "qu";
+        else if (a >= 0.5) w = "po";
+        else w = "un";
+        var el = document.getElementById("ir-" + w);
+        if (el) el.classList.add("cr");
+      }
+
+      function resetResults() {
+        document.getElementById("alphaValue").textContent = "—";
+        var b = document.getElementById("alphaBadge");
+        b.className = "abadge b-na";
+        b.textContent = "Fill in all cells";
+        document.getElementById("mSumVar").textContent = "—";
+        document.getElementById("mTotalVar").textContent = "—";
+        document.getElementById("stepList").innerHTML =
+          '<div class="pend">Fill in the table to see the solution.</div>';
+        document.getElementById("ivBreakdown").innerHTML =
+          '<div class="pend">No data yet.</div>';
+        var ids = ["ex", "gd", "ac", "qu", "po", "un"];
+        for (var i = 0; i < ids.length; i++) {
+          var el = document.getElementById("ir-" + ids[i]);
+          if (el) el.classList.remove("cr");
+        }
+      }
+
+      function toggleTheme() {
+        var isDark =
+          document.documentElement.getAttribute("data-theme") === "dark";
+        document.documentElement.setAttribute(
+          "data-theme",
+          isDark ? "light" : "dark",
+        );
+        document.getElementById("themeIcon").textContent = isDark ? "☀" : "☾";
+        document.getElementById("themeLabel").textContent = isDark
+          ? "Light mode"
+          : "Dark mode";
+        try {
+          localStorage.setItem("ca-theme", isDark ? "light" : "dark");
+        } catch (e) {}
+      }
+
+      (function () {
+        var saved, dark;
+        try {
+          saved = localStorage.getItem("ca-theme");
+        } catch (e) {}
+        try {
+          dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        } catch (e) {}
+        var t = saved || (dark ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", t);
+        if (t === "dark") {
+          document.getElementById("themeIcon").textContent = "☾";
+          document.getElementById("themeLabel").textContent = "Dark mode";
+        }
+      })();
+    </script>
+  </body>
+</html>
